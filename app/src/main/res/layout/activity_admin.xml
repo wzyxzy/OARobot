@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@mipmap/background2"
+    tools:context="com.zgty.oarobot.activity.AdminActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/AppTextView"
+            android:text="@string/setting_type"
+            android:textColor="@color/yellowText"
+            android:textSize="@dimen/main_type_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/staff_manage"
+            style="@style/AppTextView"
+            android:layout_margin="@dimen/activity_main_padding"
+            android:background="@color/redBackground"
+            android:clickable="true"
+            android:text="@string/staff_manage"
+            android:textColor="@color/whiteText" />
+
+        <TextView
+            android:id="@+id/time_manage"
+            style="@style/AppTextView"
+            android:layout_margin="@dimen/activity_main_padding"
+            android:background="@color/orangeBackground"
+            android:clickable="true"
+            android:text="@string/time_manage"
+            android:textColor="@color/whiteText" />
+
+        <TextView
+            android:id="@+id/dialog_manage"
+            style="@style/AppTextView"
+            android:layout_margin="@dimen/activity_main_padding"
+            android:background="@color/greenBackground"
+            android:clickable="true"
+            android:text="@string/dialog_manage"
+            android:textColor="@color/whiteText" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/pass_manage"
+            style="@style/AppTextView"
+            android:layout_margin="@dimen/activity_main_padding"
+            android:background="@color/blueBackground"
+            android:clickable="true"
+            android:text="@string/pass_manage"
+            android:textColor="@color/whiteText" />
+
+        <TextView
+            android:id="@+id/com_message"
+            style="@style/AppTextView"
+            android:layout_margin="@dimen/activity_main_padding"
+            android:background="@color/colorPrimaryDark"
+            android:clickable="true"
+            android:text="@string/com_message"
+            android:textColor="@color/whiteText" />
+
+        <TextView
+            android:id="@+id/back_change"
+            style="@style/AppTextView"
+            android:layout_margin="@dimen/activity_main_padding"
+            android:background="@color/purpleBackground"
+            android:clickable="true"
+            android:text="@string/back_change"
+            android:textColor="@color/whiteText" />
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/back_main"
+        android:layout_width="@dimen/back_width"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/activity_setting_padding"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:drawableLeft="@mipmap/back48"
+        android:gravity="center"
+        android:paddingLeft="@dimen/activity_main_padding"
+        android:text="@string/back_goto"
+        android:textColor="@color/greenText" />
+
+</LinearLayout>

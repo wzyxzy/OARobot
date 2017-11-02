@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/background1"
+    android:orientation="vertical"
+    tools:context="com.zgty.oarobot.activity.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <TextView
+            android:id="@+id/mode_name"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:text="@string/oa_mode_name"
+            android:textColor="@color/yellowText"
+            android:textSize="@dimen/main_type_size" />
+
+        <TextView
+            android:id="@+id/change_mode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/activity_main_padding"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:drawableRight="@mipmap/change48"
+            android:gravity="center"
+            android:text="@string/mode_change"
+            android:textColor="@color/greenText"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/activity_main_padding"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView"
+                    android:text="@string/name_staff" />
+
+                <TextView
+                    android:id="@+id/name_staff"
+                    style="@style/AppTextView"
+                    android:text="巫志英"
+                    android:textColor="@color/purpleText" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView"
+                    android:text="@string/id_staff" />
+
+                <TextView
+                    android:id="@+id/id_staff"
+                    style="@style/AppTextView"
+                    android:text="88" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView"
+                    android:text="@string/name_part" />
+
+                <TextView
+                    android:id="@+id/name_part"
+                    style="@style/AppTextView"
+                    android:text="技术研发部" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView"
+                    android:text="@string/sign_up_time" />
+
+                <TextView
+                    android:id="@+id/sign_up_time"
+                    style="@style/AppTextView"
+                    android:text="10:04"
+                    android:textColor="@color/yellowText" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView"
+                    android:text="@string/sign_up_type" />
+
+                <TextView
+                    android:id="@+id/station_state"
+                    style="@style/AppTextView"
+                    android:text="上班（迟到）"
+                    android:textColor="@color/redText" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/photo_main_padding"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/camera_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <TextView
+            android:id="@+id/robot_speak_text"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:gravity="center"
+            android:text="是不是路上堵车了，您今天迟到了啊"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/dialog_text_size" />
+
+        <TextView
+            android:id="@+id/setting_main"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:drawableRight="@mipmap/goto48"
+            android:gravity="center"
+            android:paddingRight="@dimen/activity_setting_padding"
+            android:text="@string/setting_type"
+            android:textColor="@color/greenText" />
+    </LinearLayout>
+
+</LinearLayout>
