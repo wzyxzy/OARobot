@@ -1,9 +1,9 @@
 package com.zgty.oarobot.bean;
 
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Property;
-import org.greenrobot.greendao.annotation.Generated;
 
 /**
  * Created by zy on 2017/11/2.
@@ -11,7 +11,7 @@ import org.greenrobot.greendao.annotation.Generated;
 @Entity
 public class Staff {
     @Id
-    private Long id;
+    private String id;
     @Property(nameInDb = "NAME")
     private String name_user;
     @Property(nameInDb = "ID_USER")
@@ -26,10 +26,12 @@ public class Staff {
     private String call_num;
     @Property(nameInDb = "USER_TYPE")
     private String user_type;
-    @Generated(hash = 913056970)
-    public Staff(Long id, String name_user, String id_user, String id_clerk,
+    @Property(nameInDb = "HAS_FACE")
+    private Boolean isRecordFace;
+    @Generated(hash = 1034561132)
+    public Staff(String id, String name_user, String id_user, String id_clerk,
             String name_part, String name_position, String call_num,
-            String user_type) {
+            String user_type, Boolean isRecordFace) {
         this.id = id;
         this.name_user = name_user;
         this.id_user = id_user;
@@ -38,14 +40,15 @@ public class Staff {
         this.name_position = name_position;
         this.call_num = call_num;
         this.user_type = user_type;
+        this.isRecordFace = isRecordFace;
     }
     @Generated(hash = 1774984890)
     public Staff() {
     }
-    public Long getId() {
+    public String getId() {
         return this.id;
     }
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
     public String getName_user() {
@@ -89,5 +92,19 @@ public class Staff {
     }
     public void setUser_type(String user_type) {
         this.user_type = user_type;
+    }
+
+    public Boolean getRecordFace() {
+        return isRecordFace;
+    }
+
+    public void setRecordFace(Boolean recordFace) {
+        isRecordFace = recordFace;
+    }
+    public Boolean getIsRecordFace() {
+        return this.isRecordFace;
+    }
+    public void setIsRecordFace(Boolean isRecordFace) {
+        this.isRecordFace = isRecordFace;
     }
 }

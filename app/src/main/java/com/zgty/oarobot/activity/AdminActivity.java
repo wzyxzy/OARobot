@@ -8,6 +8,8 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.zgty.oarobot.R;
+import com.zgty.oarobot.bean.Staff;
+import com.zgty.oarobot.dao.StaffDaoUtils;
 
 public class AdminActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -71,7 +73,7 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.staff_manage:
-
+                insertStaff();
                 break;
             case R.id.time_manage:
 
@@ -91,6 +93,23 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
             case R.id.back_main:
                 finish();
                 break;
+        }
+    }
+
+    private void insertStaff() {
+        StaffDaoUtils staffDaoUtils = new StaffDaoUtils(this);
+        for (int i = 0; i < 50; i++) {
+            Staff staff = new Staff();
+            staff.setId(String.valueOf(10000 + i));
+            staff.setName_user("张XX" + i);
+            staff.setId_user("zhangxx" + i);
+            staff.setId_clerk(String.valueOf(i + 1));
+            staff.setName_part("技术研发部");
+            staff.setName_position("安卓工程师");
+            staff.setCall_num(String.valueOf(18010480090L + i));
+            staff.setUser_type("会议室");
+            staff.setRecordFace(false);
+            staffDaoUtils.insertStaff(staff);
         }
     }
 }

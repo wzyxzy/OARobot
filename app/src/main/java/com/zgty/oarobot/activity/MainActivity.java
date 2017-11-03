@@ -15,8 +15,13 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.zgty.oarobot.R;
+import com.zgty.oarobot.bean.Staff;
+import com.zgty.oarobot.dao.StaffDaoUtils;
+import com.zgty.oarobot.util.LogToastUtils;
 import com.zgty.oarobot.util.SettingsFragment;
 import com.zgty.oarobot.widget.CameraPreview;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -41,7 +46,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initScreen();
         initView();
         initCamera();
+        initData();
     }
+
 
     private void initCamera() {
         mPreview = new CameraPreview(this);
@@ -113,6 +120,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         robot_speak_text = findViewById(R.id.robot_speak_text);
         setting_main = findViewById(R.id.setting_main);
         setting_main.setOnClickListener(this);
+    }
+
+    private void initData() {
+        List<Staff> staffList = new StaffDaoUtils(this).queryStaffList("10002");
+        if (staffList != null) {
+            Staff staff = staffList.get(0);
+            name_staff.setText(staff.getName_user());
+            id_staff.setText(staff.getId_clerk());
+            name_part.setText(staff.getName_part());
+            sign_up_time.setText(getNowTime());
+            station_state.setText(getType());
+        } else {
+            LogToastUtils.toastShort(this, "没有录入该信息");
+        }
+
+    }
+
+    private String getType() {
+        return "";
+    }
+
+    private String getNowTime() {
+        return "";
     }
 
     @Override
