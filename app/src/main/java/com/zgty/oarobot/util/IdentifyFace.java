@@ -103,7 +103,7 @@ public class IdentifyFace {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 if (mCamera == null) {
-                    mCamera = Camera.open(1);
+                    mCamera = Camera.open();
                     try {
                         mCamera.setFaceDetectionListener(new FaceDetectorListener());
                         mCamera.setPreviewDisplay(holder);

@@ -1,9 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@mipmap/background2"
+    android:orientation="vertical"
     tools:context="com.zgty.oarobot.activity.StaffDetail">
 
-</android.support.constraint.ConstraintLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/back_admin"
+            style="@style/AppBack" />
+
+        <TextView
+            style="@style/AppTextView3"
+            android:text="@string/staff_manage"
+            android:textColor="@color/yellowText"
+            android:textSize="@dimen/main_type_size" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/photo_main_padding"
+            android:layout_marginLeft="@dimen/photo_main_padding"
+            android:layout_weight="4"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/name_staff" />
+
+                <EditText
+                    android:id="@+id/name_staff"
+                    style="@style/AppTextView4"
+                    android:background="@null"
+                    android:text="巫志英"
+                    android:textColor="@color/greenText" />
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/name_staff_english" />
+
+                <EditText
+                    android:id="@+id/name_staff_english"
+                    style="@style/AppTextView4"
+                    android:background="@null"
+                    android:text="wuzhiying" />
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/id_staff" />
+
+                <EditText
+                    android:id="@+id/id_staff"
+                    style="@style/AppTextView4"
+
+                    android:text="88" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/telephone_num" />
+
+                <TextView
+                    android:id="@+id/telephone_num"
+                    style="@style/AppTextView4"
+                    android:text="18010480093" />
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/sign_up_type" />
+
+                <TextView
+                    android:id="@+id/station_state"
+                    style="@style/AppTextView4"
+                    android:text="上班（迟到）"
+                    android:textColor="@color/redText" />
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/sign_up_type" />
+
+                <TextView
+                    android:id="@+id/station_state"
+                    style="@style/AppTextView4"
+                    android:text="上班（迟到）"
+                    android:textColor="@color/redText" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/sign_up_type" />
+
+                <TextView
+                    android:id="@+id/station_state"
+                    style="@style/AppTextView4"
+                    android:text="上班（迟到）"
+                    android:textColor="@color/redText" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/sign_up_type" />
+
+                <TextView
+                    android:id="@+id/station_state"
+                    style="@style/AppTextView4"
+                    android:text="上班（迟到）"
+                    android:textColor="@color/redText" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/delete_staff"
+                style="@style/AppTextView2"
+                android:background="@color/orangeBackground"
+                android:text="@string/staff_delete" />
+
+            <TextView
+                android:id="@+id/edit_staff"
+                style="@style/AppTextView2"
+                android:background="@color/greenBackground"
+                android:text="@string/staff_edit" />
+
+            <TextView
+                android:id="@+id/record_face"
+                style="@style/AppTextView2"
+                android:background="@color/purpleBackground"
+                android:text="@string/staff_face_record" />
+
+            <TextView style="@style/AppTextView2" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
