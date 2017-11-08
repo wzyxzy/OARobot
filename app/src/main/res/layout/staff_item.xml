@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/staff_item_height">
+
+    <TextView
+        android:id="@+id/staff_name"
+        style="@style/AppTextStaffItem"
+        android:text="巫志英" />
+
+    <TextView
+        android:id="@+id/staff_depart"
+        style="@style/AppTextStaffItem"
+        android:text="技术研发部" />
+
+    <TextView
+        android:id="@+id/staff_num"
+        style="@style/AppTextStaffItem"
+        android:text="工号：88" />
+</LinearLayout>

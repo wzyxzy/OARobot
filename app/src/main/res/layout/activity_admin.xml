@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@mipmap/background2"
+    android:orientation="vertical"
     tools:context="com.zgty.oarobot.activity.AdminActivity">
 
     <LinearLayout
@@ -15,7 +15,7 @@
         android:orientation="horizontal">
 
         <TextView
-            style="@style/AppTextView"
+            style="@style/AppTextView4"
             android:text="@string/setting_type"
             android:textColor="@color/yellowText"
             android:textSize="@dimen/main_type_size" />
@@ -30,29 +30,20 @@
         <TextView
             android:id="@+id/staff_manage"
             style="@style/AppTextView"
-            android:layout_margin="@dimen/activity_main_padding"
             android:background="@color/redBackground"
-            android:clickable="true"
-            android:text="@string/staff_manage"
-            android:textColor="@color/whiteText" />
+            android:text="@string/staff_manage" />
 
         <TextView
             android:id="@+id/time_manage"
             style="@style/AppTextView"
-            android:layout_margin="@dimen/activity_main_padding"
             android:background="@color/orangeBackground"
-            android:clickable="true"
-            android:text="@string/time_manage"
-            android:textColor="@color/whiteText" />
+            android:text="@string/time_manage" />
 
         <TextView
             android:id="@+id/dialog_manage"
             style="@style/AppTextView"
-            android:layout_margin="@dimen/activity_main_padding"
             android:background="@color/greenBackground"
-            android:clickable="true"
-            android:text="@string/dialog_manage"
-            android:textColor="@color/whiteText" />
+            android:text="@string/dialog_manage" />
     </LinearLayout>
 
     <LinearLayout
@@ -64,43 +55,28 @@
         <TextView
             android:id="@+id/pass_manage"
             style="@style/AppTextView"
-            android:layout_margin="@dimen/activity_main_padding"
             android:background="@color/blueBackground"
-            android:clickable="true"
-            android:text="@string/pass_manage"
-            android:textColor="@color/whiteText" />
+            android:text="@string/pass_manage" />
 
         <TextView
             android:id="@+id/com_message"
             style="@style/AppTextView"
-            android:layout_margin="@dimen/activity_main_padding"
             android:background="@color/colorPrimaryDark"
-            android:clickable="true"
-            android:text="@string/com_message"
-            android:textColor="@color/whiteText" />
+            android:text="@string/com_message" />
 
         <TextView
             android:id="@+id/back_change"
             style="@style/AppTextView"
-            android:layout_margin="@dimen/activity_main_padding"
             android:background="@color/purpleBackground"
-            android:clickable="true"
-            android:text="@string/back_change"
-            android:textColor="@color/whiteText" />
+            android:text="@string/back_change" />
     </LinearLayout>
 
 
     <TextView
         android:id="@+id/back_main"
-        android:layout_width="@dimen/back_width"
+        style="@style/AppBack"
+        android:layout_marginLeft="@dimen/activity_main_padding"
         android:layout_height="0dp"
-        android:layout_margin="@dimen/activity_setting_padding"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:drawableLeft="@mipmap/back48"
-        android:gravity="center"
-        android:paddingLeft="@dimen/activity_main_padding"
-        android:text="@string/back_goto"
-        android:textColor="@color/greenText" />
+        android:layout_weight="1" />
 
 </LinearLayout>

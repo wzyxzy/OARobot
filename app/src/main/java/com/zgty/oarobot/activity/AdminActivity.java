@@ -1,17 +1,16 @@
 package com.zgty.oarobot.activity;
 
-import android.content.pm.ActivityInfo;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.zgty.oarobot.R;
 import com.zgty.oarobot.bean.Staff;
+import com.zgty.oarobot.common.CommonActivity;
 import com.zgty.oarobot.dao.StaffDaoUtils;
 
-public class AdminActivity extends AppCompatActivity implements View.OnClickListener {
+public class AdminActivity extends CommonActivity implements View.OnClickListener {
 
     private TextView staff_manage;
     private TextView time_manage;
@@ -25,31 +24,10 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
-        initScreen();
         initView();
 
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//软件在后台屏幕不需要常亮
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
-
-    }
-
-    private void initScreen() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);//设置全屏
-        if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//设置横屏
-        }
-    }
 
     private void initView() {
         staff_manage = findViewById(R.id.staff_manage);
@@ -73,7 +51,9 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.staff_manage:
-                insertStaff();
+//                insertStaff();
+                Intent intent = new Intent(this, StaffManager.class);
+                startActivity(intent);
                 break;
             case R.id.time_manage:
 

@@ -11,10 +11,13 @@
     <string name="sign_up_type">打卡类型</string>
     <string name="setting_type">设置</string>
     <string name="staff_manage">员工管理</string>
+    <string name="staff_adding">+  新增员工</string>
     <string name="time_manage">时间管理</string>
     <string name="dialog_manage">会话管理</string>
     <string name="pass_manage">密码修改</string>
     <string name="com_message">企业信息</string>
     <string name="back_change">主题切换</string>
     <string name="back_goto">返回</string>
+    <string name="tts_toast_format" formatted="false">缓冲进度为%d%%，播放进度为%d%%</string>
+
 </resources>

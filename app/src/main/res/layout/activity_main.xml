@@ -56,12 +56,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="@string/name_staff" />
 
                 <TextView
                     android:id="@+id/name_staff"
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="巫志英"
                     android:textColor="@color/purpleText" />
             </LinearLayout>
@@ -73,12 +73,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="@string/id_staff" />
 
                 <TextView
                     android:id="@+id/id_staff"
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="88" />
             </LinearLayout>
 
@@ -89,12 +89,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="@string/name_part" />
 
                 <TextView
                     android:id="@+id/name_part"
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="技术研发部" />
             </LinearLayout>
 
@@ -105,12 +105,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="@string/sign_up_time" />
 
                 <TextView
                     android:id="@+id/sign_up_time"
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="10:04"
                     android:textColor="@color/yellowText" />
             </LinearLayout>
@@ -123,12 +123,12 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="@string/sign_up_type" />
 
                 <TextView
                     android:id="@+id/station_state"
-                    style="@style/AppTextView"
+                    style="@style/AppTextView4"
                     android:text="上班（迟到）"
                     android:textColor="@color/redText" />
             </LinearLayout>

@@ -1,34 +1,31 @@
 package com.zgty.oarobot.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.iflytek.cloud.ErrorCode;
 import com.zgty.oarobot.R;
 import com.zgty.oarobot.bean.Staff;
+import com.zgty.oarobot.common.CommonActivity;
 import com.zgty.oarobot.dao.StaffDaoUtils;
+import com.zgty.oarobot.util.IdentifyFace;
 import com.zgty.oarobot.util.LogToastUtils;
-import com.zgty.oarobot.widget.DrawFacesView;
 
-import java.io.IOException;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+import static com.zgty.oarobot.common.OARobotApplication.mTts;
+
+public class MainActivity extends CommonActivity implements View.OnClickListener {
 
     private TextView mode_name;
     private TextView change_mode;
@@ -38,64 +35,89 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView station_state;
     private FrameLayout camera_preview;
 
-    private SurfaceView mPreview;
     private TextView name_part;
     private TextView robot_speak_text;
     private TextView setting_main;
+    private IdentifyFace identifyFace;
+    private String userid = "00000";
 
-    private DrawFacesView facesView;
-    private SurfaceHolder mHolder;
+
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CAMERA_CODE = 0x100;
-    private Camera mCamera;
+
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 0://识别成功
+                    initData();
+
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    int code = mTts.startSpeaking("欢迎使用中广通业打卡系统", null);
+//			/**
+//			 * 只保存音频不进行播放接口,调用此接口请注释startSpeaking接口
+//			 * text:要合成的文本，uri:需要保存的音频全路径，listener:回调接口
+//			*/
+//			String path = Environment.getExternalStorageDirectory()+"/tts.pcm";
+//			int code = mTts.synthesizeToUri(text, path, mTtsListener);
+
+                    if (code != ErrorCode.SUCCESS) {
+                        LogToastUtils.toastShort(getApplicationContext(), "语音合成失败,错误码: " + code);
+                    }
+                    break;
+            }
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         requestPermissions();
-        initScreen();
         initView();
-        initCamera();
-//        initData();
-
-        openSurfaceView();
+        handler.sendEmptyMessage(2);
 
     }
 
 
-    private void initCamera() {
-//        mPreview = new CameraPreview(this);
-//        camera_preview.addView(mPreview);
-//        SettingsFragment.passCamera(mPreview.getCameraInstance());
-//        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-//        SettingsFragment.setDefault(PreferenceManager.getDefaultSharedPreferences(this));
-//        SettingsFragment.init(PreferenceManager.getDefaultSharedPreferences(this));
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//软件在后台屏幕不需要常亮
-        mPreview = null;
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
-        if (mPreview == null) {
-            initCamera();
+        if (identifyFace == null) {
+            identifyFace = new IdentifyFace(camera_preview, this);
+            identifyFace.openSurfaceView();
         }
+        identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {
+            @Override
+            public void onSuccess(String user_id) {
+                LogToastUtils.toastShort(getApplicationContext(), "success");
+                handler.sendEmptyMessage(0);
+                userid = user_id;
+//                onResume();
+            }
+
+            @Override
+            public void onSwitch() {
+                LogToastUtils.toastShort(getApplicationContext(), "switch");
+                handler.sendEmptyMessage(1);
+            }
+
+            @Override
+            public void onError() {
+                LogToastUtils.toastShort(getApplicationContext(), "error");
+            }
+        });
+
     }
 
-    private void initScreen() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);//设置全屏
-        if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//设置横屏
-        }
-    }
 
     private void requestPermissions() {
         try {
@@ -135,35 +157,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setting_main = findViewById(R.id.setting_main);
         setting_main.setOnClickListener(this);
 
-
-        mPreview = new SurfaceView(this);
-        facesView = new DrawFacesView(this);
-        camera_preview.addView(mPreview);
-        camera_preview.addView(facesView);
-//        addContentView(mPreview, camera_preview.getLayoutParams());
-//        addContentView(facesView, camera_preview.getLayoutParams());
-
     }
 
+    //识别完毕后，数据加载，写在异步线程
     private void initData() {
-        List<Staff> staffList = new StaffDaoUtils(this).queryStaffList("10002");
-        if (staffList != null) {
+//        userid = "10003";
+        List<Staff> staffList = new StaffDaoUtils(this).queryStaffList(userid);
+        if (staffList != null && staffList.size() > 0) {
             Staff staff = staffList.get(0);
             name_staff.setText(staff.getName_user());
             id_staff.setText(staff.getId_clerk());
             name_part.setText(staff.getName_part());
             sign_up_time.setText(getNowTime());
             station_state.setText(getType());
+            mTts.startSpeaking(staff.getName_user() + "，早上好！新的一天开始了，好好工作哦！", null);
+
         } else {
             LogToastUtils.toastShort(this, "没有录入该信息");
+//            mTts.startSpeaking("没有录入该信息", null);
         }
 
     }
 
+    //获取打卡类型
     private String getType() {
         return "";
     }
 
+    //获取当前时间
     private String getNowTime() {
         return "";
     }
@@ -183,161 +204,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /**
-     * 把摄像头的图像显示到SurfaceView
-     */
-    private void openSurfaceView() {
-        mHolder = mPreview.getHolder();
-        mHolder.addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                if (mCamera == null) {
-                    mCamera = Camera.open(1);
-                    try {
-                        mCamera.setFaceDetectionListener(new FaceDetectorListener());
-                        mCamera.setPreviewDisplay(holder);
-                        startFaceDetection();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        identifyFace.finisheIdentify();
+        identifyFace = null;
 
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                if (mHolder.getSurface() == null) {
-                    // preview surface does not exist
-                    Log.e(TAG, "mHolder.getSurface() == null");
-                    return;
-                }
-
-                try {
-                    mCamera.stopPreview();
-
-                } catch (Exception e) {
-                    // ignore: tried to stop a non-existent preview
-                    Log.e(TAG, "Error stopping camera preview: " + e.getMessage());
-                }
-
-                try {
-                    mCamera.setPreviewDisplay(mHolder);
-                    int measuredWidth = mPreview.getWidth();
-                    int measuredHeight = mPreview.getHeight();
-                    setCameraParms(mCamera, measuredWidth, measuredHeight);
-                    mCamera.startPreview();
-
-                    startFaceDetection(); // re-start face detection feature
-
-                } catch (Exception e) {
-                    // ignore: tried to stop a non-existent preview
-                    Log.d(TAG, "Error starting camera preview: " + e.getMessage());
-                }
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                mCamera.stopPreview();
-                mCamera.release();
-                mCamera = null;
-                holder = null;
-            }
-        });
-    }
-
-    /**
-     * 在摄像头启动前设置参数
-     *
-     * @param camera
-     * @param width
-     * @param height
-     */
-    private void setCameraParms(Camera camera, int width, int height) {
-        // 获取摄像头支持的pictureSize列表
-        Camera.Parameters parameters = camera.getParameters();
-        /*List<Camera.Size> pictureSizeList = parameters.getSupportedPictureSizes();
-        // 从列表中选择合适的分辨率
-        Camera.Size pictureSize = getProperSize(pictureSizeList, (float) height / width);
-        if (null == pictureSize) {
-            pictureSize = parameters.getPictureSize();
-        }
-        // 根据选出的PictureSize重新设置SurfaceView大小
-        float w = pictureSize.width;
-        float h = pictureSize.height;
-        parameters.setPictureSize(pictureSize.width, pictureSize.height);
-
-        surfaceView.setLayoutParams(new FrameLayout.LayoutParams((int) (height * (h / w)), height));
-
-        // 获取摄像头支持的PreviewSize列表
-        List<Camera.Size> previewSizeList = parameters.getSupportedPreviewSizes();
-        Camera.Size preSize = getProperSize(previewSizeList, (float) height / width);
-        if (null != preSize) {
-            parameters.setPreviewSize(preSize.width, preSize.height);
-        }
-*/
-        parameters.setJpegQuality(100);
-        if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            // 连续对焦
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        }
-        camera.cancelAutoFocus();
-        camera.setDisplayOrientation(90);
-        camera.setParameters(parameters);
-    }
-
-    public void startFaceDetection() {
-        // Try starting Face Detection
-        Camera.Parameters params = mCamera.getParameters();
-        // start face detection only *after* preview has started
-        if (params.getMaxNumDetectedFaces() > 0) {
-            // mCamera supports face detection, so can start it:
-            mCamera.startFaceDetection();
-        } else {
-            Log.e("tag", "【FaceDetectorActivity】类的方法：【startFaceDetection】: " + "不支持");
-        }
-    }
-
-    /**
-     * 脸部检测接口
-     */
-    private class FaceDetectorListener implements Camera.FaceDetectionListener {
-        @Override
-        public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-            if (faces.length > 0) {
-                Camera.Face face = faces[0];
-                Rect rect = face.rect;
-                Log.d("FaceDetection", "可信度：" + face.score + "face detected: " + faces.length +
-                        " Face 1 Location X: " + rect.centerX() +
-                        "Y: " + rect.centerY() + "   " + rect.left + " " + rect.top + " " + rect.right + " " + rect.bottom);
-                Log.e("tag", "【FaceDetectorListener】类的方法：【onFaceDetection】: ");
-                Matrix matrix = updateFaceRect();
-                facesView.updateFaces(matrix, faces);
-            } else {
-                // 只会执行一次
-                Log.e("tag", "【FaceDetectorListener】类的方法：【onFaceDetection】: " + "没有脸部");
-                facesView.removeRect();
-            }
-        }
-    }
-
-    /**
-     * 因为对摄像头进行了旋转，所以同时也旋转画板矩阵
-     * 详细请查看{@link Camera.Face#rect}
-     *
-     * @return
-     */
-    private Matrix updateFaceRect() {
-        Matrix matrix = new Matrix();
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        // Need mirror for front camera.
-//        boolean mirror = (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
-//        matrix.setScale(mirror ? -1 : 1, 1);
-        matrix.setScale(-1, 1);
-        // This is the value for android.hardware.Camera.setDisplayOrientation.
-        matrix.postRotate(90);
-        // Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
-        // UI coordinates range from (0, 0) to (width, height).
-        matrix.postScale(mPreview.getWidth() / 2000f, mPreview.getHeight() / 2000f);
-        matrix.postTranslate(mPreview.getWidth() / 2f, mPreview.getHeight() / 2f);
-        return matrix;
     }
 }

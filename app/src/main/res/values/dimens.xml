@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="activity_main_padding">20dp</dimen>
+    <dimen name="activity_min_padding">10dp</dimen>
     <dimen name="activity_setting_padding">20dp</dimen>
     <dimen name="photo_main_padding">30dp</dimen>
     <dimen name="back_width">100dp</dimen>
+    <dimen name="staff_item_height">50dp</dimen>
     <dimen name="dialog_text_size">24sp</dimen>
     <dimen name="main_type_size">24sp</dimen>
 </resources>

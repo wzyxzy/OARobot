@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/background2"
+    android:orientation="vertical"
+    tools:context="com.zgty.oarobot.activity.StaffManager">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/back_admin"
+            style="@style/AppBack" />
+
+        <TextView
+            style="@style/AppTextView3"
+            android:text="@string/staff_manage"
+            android:textColor="@color/yellowText"
+            android:textSize="@dimen/main_type_size" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5">
+
+        <ListView
+            android:id="@+id/staff_listview"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/photo_main_padding"
+            android:layout_weight="4" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView style="@style/AppTextView2" />
+
+            <TextView style="@style/AppTextView2" />
+
+            <TextView style="@style/AppTextView2" />
+
+            <TextView
+                android:id="@+id/staff_add"
+
+                style="@style/AppTextView2"
+                android:background="@color/redBackground"
+                android:text="@string/staff_adding" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+</LinearLayout>

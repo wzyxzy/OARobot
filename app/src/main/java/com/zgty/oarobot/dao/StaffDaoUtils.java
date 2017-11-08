@@ -86,7 +86,7 @@ public class StaffDaoUtils {
      * 查询用户列表
      */
     public List<Staff> queryStaffList() {
-        DaoMaster daoMaster = new DaoMaster(readableDatabase);
+        DaoMaster daoMaster = new DaoMaster(writableDatabase);
         DaoSession daoSession = daoMaster.newSession();
         StaffDao staffDao = daoSession.getStaffDao();
         QueryBuilder<Staff> qb = staffDao.queryBuilder();
@@ -98,7 +98,7 @@ public class StaffDaoUtils {
      * 查询用户列表
      */
     public List<Staff> queryStaffList(String id) {
-        DaoMaster daoMaster = new DaoMaster(readableDatabase);
+        DaoMaster daoMaster = new DaoMaster(writableDatabase);
         DaoSession daoSession = daoMaster.newSession();
         StaffDao staffDao = daoSession.getStaffDao();
         QueryBuilder<Staff> qb = staffDao.queryBuilder();

@@ -3,7 +3,7 @@ apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 26
-    greendao{
+    greendao {
         schemaVersion 1
         targetGenDir 'src/main/java'
     }
@@ -34,4 +34,5 @@ dependencies {
     compile 'org.greenrobot:greendao:3.2.2'
     implementation files('libs/Msc.jar')
     implementation files('libs/Sunflower.jar')
+    implementation 'com.google.code.gson:gson:2.8.2'
 }
