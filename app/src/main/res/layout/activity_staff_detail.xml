@@ -49,8 +49,7 @@
 
                 <EditText
                     android:id="@+id/name_staff"
-                    style="@style/AppTextView4"
-                    android:background="@null"
+                    style="@style/AppTextView5"
                     android:text="巫志英"
                     android:textColor="@color/greenText" />
 
@@ -60,8 +59,7 @@
 
                 <EditText
                     android:id="@+id/name_staff_english"
-                    style="@style/AppTextView4"
-                    android:background="@null"
+                    style="@style/AppTextView5"
                     android:text="wuzhiying" />
 
                 <TextView
@@ -70,8 +68,8 @@
 
                 <EditText
                     android:id="@+id/id_staff"
-                    style="@style/AppTextView4"
-
+                    style="@style/AppTextView5"
+                    android:inputType="number"
                     android:text="88" />
             </LinearLayout>
 
@@ -85,30 +83,29 @@
                     style="@style/AppTextView4"
                     android:text="@string/telephone_num" />
 
-                <TextView
+                <EditText
                     android:id="@+id/telephone_num"
-                    style="@style/AppTextView4"
+                    style="@style/AppTextView5"
+                    android:inputType="number"
                     android:text="18010480093" />
 
                 <TextView
                     style="@style/AppTextView4"
-                    android:text="@string/sign_up_type" />
+                    android:text="@string/name_part" />
+
+                <EditText
+                    android:id="@+id/name_part"
+                    style="@style/AppTextView5"
+                    android:text="研发部" />
 
                 <TextView
-                    android:id="@+id/station_state"
                     style="@style/AppTextView4"
-                    android:text="上班（迟到）"
-                    android:textColor="@color/redText" />
+                    android:text="@string/staff_position" />
 
-                <TextView
-                    style="@style/AppTextView4"
-                    android:text="@string/sign_up_type" />
-
-                <TextView
-                    android:id="@+id/station_state"
-                    style="@style/AppTextView4"
-                    android:text="上班（迟到）"
-                    android:textColor="@color/redText" />
+                <EditText
+                    android:id="@+id/staff_position"
+                    style="@style/AppTextView5"
+                    android:text="安卓开发" />
             </LinearLayout>
 
             <LinearLayout
@@ -119,30 +116,52 @@
 
                 <TextView
                     style="@style/AppTextView4"
-                    android:text="@string/sign_up_type" />
+                    android:text="@string/welcome_type" />
+
+                <Spinner
+                    android:id="@+id/welcome_type"
+                    style="@style/AppTextView4" />
 
                 <TextView
-                    android:id="@+id/station_state"
                     style="@style/AppTextView4"
-                    android:text="上班（迟到）"
+                    android:text="@string/record_face_or_no" />
+
+                <TextView
+                    android:id="@+id/record_face_or_no"
+                    style="@style/AppTextView4"
+                    android:text="@string/face_not_record"
                     android:textColor="@color/redText" />
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/edit_sure_cancel"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="invisible">
 
                 <TextView
+                    android:id="@+id/edit_cancel"
                     style="@style/AppTextView4"
-                    android:text="@string/sign_up_type" />
-
-                <TextView
-                    android:id="@+id/station_state"
-                    style="@style/AppTextView4"
-                    android:text="上班（迟到）"
+                    android:clickable="true"
+                    android:drawableLeft="@mipmap/cancel"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="@dimen/photo_main_padding"
+                    android:text="@string/cancel_name"
                     android:textColor="@color/redText" />
+
+                <TextView
+                    android:id="@+id/edit_sure"
+                    style="@style/AppTextView4"
+                    android:clickable="true"
+                    android:drawableLeft="@mipmap/sure"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="@dimen/photo_main_padding"
+                    android:text="@string/sure_name"
+                    android:textColor="@color/greenText" />
             </LinearLayout>
         </LinearLayout>
 

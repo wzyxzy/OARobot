@@ -8,6 +8,7 @@ import com.zgty.oarobot.bean.DaoSession;
 import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.bean.StaffDao;
 
+import org.greenrobot.greendao.query.DeleteQuery;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
@@ -70,6 +71,12 @@ public class StaffDaoUtils {
         staffDao.delete(staff);
     }
 
+    public void deleteUser(String userId) {
+        QueryBuilder<Staff> qb = new DaoMaster(writableDatabase).newSession().getStaffDao().queryBuilder();
+        DeleteQuery<Staff> bd = qb.where(StaffDao.Properties.Id.eq(userId)).buildDelete();
+        bd.executeDeleteWithoutDetachingEntities();
+    }
+
     /**
      * 更新一条记录
      *
@@ -102,7 +109,7 @@ public class StaffDaoUtils {
         DaoSession daoSession = daoMaster.newSession();
         StaffDao staffDao = daoSession.getStaffDao();
         QueryBuilder<Staff> qb = staffDao.queryBuilder();
-        qb.where(StaffDao.Properties.Id.gt(id));
+        qb.where(StaffDao.Properties.Id.eq(id));
         List<Staff> list = qb.list();
         return list;
     }

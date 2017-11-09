@@ -15,7 +15,6 @@ public class CommonActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
-        initScreen();
     }
 
     @Override
@@ -27,6 +26,7 @@ public class CommonActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        initScreen();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
 
     }
