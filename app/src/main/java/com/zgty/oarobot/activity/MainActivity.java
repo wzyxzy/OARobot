@@ -23,6 +23,7 @@ import com.zgty.oarobot.util.LogToastUtils;
 
 import java.util.List;
 
+import static com.zgty.oarobot.common.Constant.MAIN_CHECK_CAMERA_TYPE;
 import static com.zgty.oarobot.common.OARobotApplication.mTts;
 
 public class MainActivity extends CommonActivity implements View.OnClickListener {
@@ -86,13 +87,11 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     }
 
 
-
-
     @Override
     protected void onResume() {
         super.onResume();
         if (identifyFace == null) {
-            identifyFace = new IdentifyFace(camera_preview, this);
+            identifyFace = new IdentifyFace(camera_preview, this, MAIN_CHECK_CAMERA_TYPE);
             identifyFace.openSurfaceView();
         }
         identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {
@@ -113,6 +112,16 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             @Override
             public void onError() {
                 LogToastUtils.toastShort(getApplicationContext(), "error");
+            }
+
+            @Override
+            public void onCapture() {
+
+            }
+
+            @Override
+            public void onRegisterSuccess() {
+
             }
         });
 

@@ -1,8 +1,10 @@
 package com.zgty.oarobot.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -13,8 +15,11 @@ import com.zgty.oarobot.R;
 import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.common.CommonActivity;
 import com.zgty.oarobot.dao.StaffDaoUtils;
+import com.zgty.oarobot.util.IdentifyFace;
 import com.zgty.oarobot.util.LogToastUtils;
+import com.zgty.oarobot.widget.MyDialog;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StaffDetail extends CommonActivity implements View.OnClickListener {
@@ -38,6 +43,9 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
     private int detail_type;
     private Staff staff;
     private boolean firstAdd;
+    private ArrayAdapter<String> adapter;//spinner的adapter
+    private List<String> workType = new ArrayList<String>();//接待类型：工位，办公室
+    private IdentifyFace identifyFace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +67,7 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                 break;
             case 1:
                 setDetails();
+                makeStaffCannotEdit();
                 firstAdd = false;
                 break;
         }
@@ -74,6 +83,15 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
             name_part.setText(staff.getName_part());
             telephone_num.setText(staff.getCall_num());
             staff_position.setText(staff.getName_position());
+            welcome_type.setSelection(Integer.valueOf(staff.getUser_type()));
+            if (staff.getIsRecordFace()) {
+                record_face_or_no.setTextColor(getResources().getColor(R.color.greenText));
+                record_face_or_no.setText(getResources().getString(R.string.face_has_recorded));
+
+            } else {
+                record_face_or_no.setTextColor(getResources().getColor(R.color.redText));
+                record_face_or_no.setText(getResources().getString(R.string.face_not_record));
+            }
 //            welcome_type.setText(staff.getName_position());
 //            mTts.startSpeaking(staff.getName_user() + "，早上好！新的一天开始了，好好工作哦！", null);
 
@@ -115,7 +133,11 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
         edit_staff.setOnClickListener(this);
         record_face = findViewById(R.id.record_face);
         record_face.setOnClickListener(this);
-
+        workType.add("工位");
+        workType.add("办公室");
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, workType);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        welcome_type.setAdapter(adapter);
     }
 
     private void submit() {
@@ -166,15 +188,20 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
         staff.setCall_num(num);
         staff.setName_part(part);
         staff.setName_position(position);
-        staff_id = english + id_clerk;
-        staff.setId(staff_id);
+        staff.setUser_type(String.valueOf(welcome_type.getSelectedItemPosition()));
+        staff.setRecordFace(false);
+        if (firstAdd) {
+            staff_id = english + id_clerk;
+            staff.setId(staff_id);
+        }
+
         if (firstAdd) {
             new StaffDaoUtils(this).insertStaff(staff);
         } else {
-            try{
-            new StaffDaoUtils(this).updateStaff(staff);
-            }catch(Exception e){
-                LogToastUtils.toastShort(this,e.getMessage());
+            try {
+                new StaffDaoUtils(this).updateStaff(staff);
+            } catch (Exception e) {
+                LogToastUtils.toastShort(this, e.getMessage());
             }
         }
         firstAdd = false;
@@ -205,8 +232,24 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                 if (firstAdd) {
                     LogToastUtils.toastShort(this, "请先保存后再操作！");
                 } else {
-                    new StaffDaoUtils(this).deleteStaff(staff);
-                    finish();
+                    final MyDialog myDialog = new MyDialog(this);
+                    myDialog.setMessage("删除员工会将其录入的人脸一并删除，确定要删除吗？");
+                    myDialog.setYesOnclickListener("确定", new MyDialog.onYesOnclickListener() {
+                        @Override
+                        public void onYesClick() {
+                            myDialog.dismiss();
+                            new StaffDaoUtils(getApplicationContext()).deleteStaff(staff);
+                            deleteFace();
+                        }
+                    });
+                    myDialog.setNoOnclickListener("取消", new MyDialog.onNoOnclickListener() {
+                        @Override
+                        public void onNoClick() {
+                            myDialog.dismiss();
+                        }
+                    });
+                    myDialog.show();
+
                 }
 
                 break;
@@ -220,8 +263,46 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                 break;
             case R.id.record_face:
                 //人脸录入
+                Intent intent = new Intent(this, MakeSureFace.class);
+                intent.putExtra("staff_id", staff_id);
+                startActivity(intent);
                 break;
 
+        }
+    }
+
+    private void deleteFace() {
+        if (identifyFace == null) {
+            identifyFace = new IdentifyFace(this);
+            identifyFace.deleteFace(staff_id);
+            identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {
+                @Override
+                public void onSuccess(String user_id) {
+
+                }
+
+                @Override
+                public void onSwitch() {
+
+                }
+
+                @Override
+                public void onError() {
+
+                }
+
+                @Override
+                public void onCapture() {
+
+                }
+
+                @Override
+                public void onRegisterSuccess() {
+                    LogToastUtils.toastShort(getApplicationContext(), "员工删除成功！");
+                    finish();
+
+                }
+            });
         }
     }
 
@@ -239,8 +320,7 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
         name_part.setFocusable(true);
         staff_position.setFocusableInTouchMode(true);
         staff_position.setFocusable(true);
-        welcome_type.setFocusableInTouchMode(true);
-        welcome_type.setFocusable(true);
+        welcome_type.setEnabled(true);
     }
 
     private void makeStaffCannotEdit() {
@@ -257,7 +337,6 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
         name_part.setFocusable(false);
         staff_position.setFocusableInTouchMode(false);
         staff_position.setFocusable(false);
-        welcome_type.setFocusableInTouchMode(false);
-        welcome_type.setFocusable(false);
+        welcome_type.setEnabled(false);
     }
 }

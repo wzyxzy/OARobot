@@ -39,7 +39,12 @@ public class StaffManager extends CommonActivity implements View.OnClickListener
     private void initData() {
         StaffDaoUtils staffDaoUtils = new StaffDaoUtils(this);
         staffList = staffDaoUtils.queryStaffList();
-        staffChooseAdapter.updateRes(staffList);
+        if (staffList != null && staffList.size() > 0) {
+            staffChooseAdapter.updateRes(staffList);
+        } else {
+            staffChooseAdapter.removeAll();
+        }
+
 
     }
 
@@ -77,8 +82,6 @@ public class StaffManager extends CommonActivity implements View.OnClickListener
                 break;
         }
     }
-
-
 
 
 }

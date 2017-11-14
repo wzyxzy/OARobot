@@ -24,4 +24,11 @@
     <color name="grey7Text">#515151</color>
     <color name="grey8Text">#2c2c2c</color>
     <color name="blackText">#000000</color>
+    <color name="dialog_bg_color">#9d16161b</color>
+    <color name="transLucent">#60000000</color>
+    <color name="lineColor">#eaeaea</color>
+    <color name="grey">#888888</color>
+    <color name="title_bg">#4099e9</color>
+    <color name="black">#2a2a2a</color>
+    <color name="red">#ff001e</color>
 </resources>

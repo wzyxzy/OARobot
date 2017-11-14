@@ -80,4 +80,34 @@
         <item name="android:textColor">@color/greenText</item>
     </style>
 
+    <style name="noticeDialogStyle" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+    <!--弹框样式-->
+    <style name="MyDialog" parent="android:style/Theme.Dialog">
+        <item name="android:windowBackground">@color/transLucent</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <!--自定义弹窗样式-->
+    <style name="MyActivityDialogStyle">
+        <item name="android:windowBackground">@android:color/transparent</item> <!--设置dialog的背景-->
+        <item name="android:windowFrame">@null</item> <!--Dialog的windowFrame框为无-->
+        <item name="android:windowNoTitle">true</item> <!--是否有title-->
+        <item name="android:windowIsFloating">true</item> <!--是否浮现在activity之上-->
+        <item name="android:windowIsTranslucent">true</item> <!--是否半透明-->
+        <item name="android:windowContentOverlay">@null</item> <!--对话框是否有遮盖，这个不设置的话，可能会出现边框黑线-->
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item> <!--动画-->
+        <item name="android:backgroundDimEnabled">true</item> <!-- 背景是否模糊显示-->
+    </style>
 </resources>

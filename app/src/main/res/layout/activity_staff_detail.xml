@@ -50,7 +50,6 @@
                 <EditText
                     android:id="@+id/name_staff"
                     style="@style/AppTextView5"
-                    android:text="巫志英"
                     android:textColor="@color/greenText" />
 
                 <TextView
@@ -59,8 +58,7 @@
 
                 <EditText
                     android:id="@+id/name_staff_english"
-                    style="@style/AppTextView5"
-                    android:text="wuzhiying" />
+                    style="@style/AppTextView5" />
 
                 <TextView
                     style="@style/AppTextView4"
@@ -69,8 +67,7 @@
                 <EditText
                     android:id="@+id/id_staff"
                     style="@style/AppTextView5"
-                    android:inputType="number"
-                    android:text="88" />
+                    android:inputType="number" />
             </LinearLayout>
 
             <LinearLayout
@@ -86,8 +83,7 @@
                 <EditText
                     android:id="@+id/telephone_num"
                     style="@style/AppTextView5"
-                    android:inputType="number"
-                    android:text="18010480093" />
+                    android:inputType="number" />
 
                 <TextView
                     style="@style/AppTextView4"
@@ -95,8 +91,7 @@
 
                 <EditText
                     android:id="@+id/name_part"
-                    style="@style/AppTextView5"
-                    android:text="研发部" />
+                    style="@style/AppTextView5" />
 
                 <TextView
                     style="@style/AppTextView4"
@@ -104,8 +99,7 @@
 
                 <EditText
                     android:id="@+id/staff_position"
-                    style="@style/AppTextView5"
-                    android:text="安卓开发" />
+                    style="@style/AppTextView5" />
             </LinearLayout>
 
             <LinearLayout

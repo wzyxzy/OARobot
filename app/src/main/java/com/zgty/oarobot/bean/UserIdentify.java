@@ -26,6 +26,16 @@ public class UserIdentify {
     private String ssub;
     private int topc;
 
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    private String user;
+
     public int getRet() {
         return ret;
     }

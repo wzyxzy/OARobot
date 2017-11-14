@@ -17,4 +17,10 @@
         android:id="@+id/staff_num"
         style="@style/AppTextStaffItem"
         android:text="工号：88" />
+
+    <TextView
+        android:id="@+id/staff_no_face"
+        style="@style/AppTextStaffItem"
+        android:text="待录入人脸"
+        android:textColor="@color/redText" />
 </LinearLayout>

@@ -18,6 +18,8 @@
     <string name="record_face_or_no">是否录入人脸</string>
     <string name="face_has_recorded">已录入</string>
     <string name="face_not_record">未录入</string>
+    <string name="face_no_record">未录入人脸</string>
+    <string name="face_has_record">已录入人脸</string>
     <string name="setting_type">设置</string>
     <string name="sure_name">  确认</string>
     <string name="cancel_name">  取消</string>

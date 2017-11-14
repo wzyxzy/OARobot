@@ -29,6 +29,8 @@ import com.zgty.oarobot.widget.DrawFacesView;
 
 import java.io.IOException;
 
+import static com.zgty.oarobot.common.Constant.MAIN_CHECK_CAMERA_TYPE;
+import static com.zgty.oarobot.common.Constant.pGroupId;
 import static com.zgty.oarobot.common.Constant.pScoreDivider;
 import static com.zgty.oarobot.common.OARobotApplication.mTts;
 
@@ -42,12 +44,32 @@ public class IdentifyFace {
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private SurfaceView mPreview;
-    private FrameLayout camera_preview;
     private Context context;
     private ToneGenerator tone;
     private ProgressDialog mProDialog;
     private IdentityVerifier mIdVerifier;
     private OnIdentifyListener onIdentifyListener;
+    private byte[] data;
+    private int type;
+
+    public IdentifyFace(Context context) {
+        this.context = context;
+        mIdVerifier = IdentityVerifier.createVerifier(context, new InitListener() {
+            @Override
+            public void onInit(int errorCode) {
+                if (ErrorCode.SUCCESS == errorCode) {
+                    LogToastUtils.log(TAG, "引擎初始化成功");
+                } else {
+                    LogToastUtils.log(TAG, "引擎初始化失败，错误码：" + errorCode);
+                }
+            }
+        });
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
 
     public void setOnIdentifyListener(OnIdentifyListener onIdentifyListener) {
 
@@ -55,11 +77,18 @@ public class IdentifyFace {
     }
 
 
-    public IdentifyFace(FrameLayout camera_preview, final Context context) {
-        this.camera_preview = camera_preview;
+    /**
+     * 初始化人脸识别
+     *
+     * @param camera_preview 摄像头
+     * @param context        上下文
+     * @param type           识别/录入 类型
+     */
+    public IdentifyFace(FrameLayout camera_preview, final Context context, int type) {
         this.context = context;
         mPreview = new SurfaceView(context);
         facesView = new DrawFacesView(context);
+        this.type = type;
         camera_preview.addView(mPreview);
         camera_preview.addView(facesView);
         mProDialog = new ProgressDialog(context);
@@ -103,7 +132,7 @@ public class IdentifyFace {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 if (mCamera == null) {
-                    mCamera = Camera.open();
+                    mCamera = Camera.open(1);
                     try {
                         mCamera.setFaceDetectionListener(new FaceDetectorListener());
                         mCamera.setPreviewDisplay(holder);
@@ -195,6 +224,11 @@ public class IdentifyFace {
         camera.setParameters(parameters);
     }
 
+    public void startCameraView() {
+        if (mCamera != null)
+            mCamera.startPreview();
+    }
+
     public void startFaceDetection() {
         // Try starting Face Detection
         Camera.Parameters params = mCamera.getParameters();
@@ -225,7 +259,6 @@ public class IdentifyFace {
                 //拍照，并上传到讯飞
 
                 try {
-//                    camera.stopPreview();
                     camera.takePicture(shutterCallback, null, jpegCallback);
                     camera.stopPreview();
 
@@ -241,29 +274,197 @@ public class IdentifyFace {
         }
     }
 
+    /**
+     * 添加员工到群组
+     *
+     * @param id_staff 员工id
+     */
+    public void addStaff(final String id_staff) {
+        // sst=add，auth_id=eqhe，group_id=123456，scope=person
+        mIdVerifier.setParameter(SpeechConstant.PARAMS, null);
+        // 设置会话场景
+        mIdVerifier.setParameter(SpeechConstant.MFV_SCENES, "ipt");
+        // 用户id
+        mIdVerifier.setParameter(SpeechConstant.AUTH_ID, id_staff);
+        // 设置模型参数，若无可以传空字符传
+        StringBuffer params2 = new StringBuffer();
+        params2.append("auth_id=" + id_staff);
+        params2.append(",scope=person");
+        params2.append(",group_id=" + Constant.pGroupId);
+        // 执行模型操作
+        mIdVerifier.execute("ipt", "add", params2.toString(), new IdentityListener() {
+            @Override
+            public void onResult(IdentityResult identityResult, boolean b) {
+                Log.d(TAG, identityResult.getResultString());
+                UserIdentify groupManagerBack = new Gson().fromJson(identityResult.getResultString(), UserIdentify.class);
+                if (groupManagerBack.getRet() == ErrorCode.SUCCESS) {
+                    registerStaff(id_staff);
+                } else {
+                    LogToastUtils.toastShort(context, new SpeechError(groupManagerBack.getRet()).getPlainDescription(true));
+                }
+            }
+
+            @Override
+            public void onError(SpeechError speechError) {
+                LogToastUtils.toastShort(context, speechError.getPlainDescription(true));
+            }
+
+            @Override
+            public void onEvent(int i, int i1, int i2, Bundle bundle) {
+
+            }
+        });
+    }
+
+    /**
+     * 注册员工人脸
+     *
+     * @param id_staff 员工id
+     */
+    private void registerStaff(String id_staff) {
+        if (data != null) {
+            // 清空参数
+            mIdVerifier.setParameter(SpeechConstant.PARAMS, null);
+            // 设置会话场景
+            mIdVerifier.setParameter(SpeechConstant.MFV_SCENES, "ifr");
+            // 设置会话类型
+            mIdVerifier.setParameter(SpeechConstant.MFV_SST, "enroll");
+            // 设置用户id
+            mIdVerifier.setParameter(SpeechConstant.AUTH_ID, id_staff);
+            // 设置监听器，开始会话
+            mIdVerifier.startWorking(mEnrollListener);
+            // 子业务执行参数，若无可以传空字符传
+            StringBuffer params = new StringBuffer();
+            // 向子业务写入数据，人脸数据可以一次写入
+            mIdVerifier.writeData("ifr", params.toString(), data, 0, data.length);
+            // 停止写入
+            mIdVerifier.stopWrite("ifr");
+        }
+
+    }
+
+
+    /**
+     * 删除人脸
+     *
+     * @param id_staff 员工id
+     */
+    public void deleteFace(final String id_staff) {
+        // 清空参数
+        mIdVerifier.setParameter(SpeechConstant.PARAMS, null);
+        // 设置会话场景
+        mIdVerifier.setParameter(SpeechConstant.MFV_SCENES, "ifr");
+        // 用户id
+        mIdVerifier.setParameter(SpeechConstant.AUTH_ID, id_staff);
+
+        // 设置模型参数，若无可以传空字符传
+        StringBuffer params = new StringBuffer();
+        // 执行模型操作
+        mIdVerifier.execute("ifr", "delete", params.toString(), new IdentityListener() {
+            @Override
+            public void onResult(IdentityResult identityResult, boolean b) {
+                Log.d(TAG, identityResult.getResultString());
+                UserIdentify groupManagerBack = new Gson().fromJson(identityResult.getResultString(), UserIdentify.class);
+                if (groupManagerBack.getRet() == ErrorCode.SUCCESS) {
+                    deleteStaff(id_staff);
+                } else {
+                    LogToastUtils.log(TAG, new SpeechError(groupManagerBack.getRet()).getPlainDescription(true));
+                }
+            }
+
+            @Override
+            public void onError(SpeechError speechError) {
+                LogToastUtils.log(TAG, speechError.getPlainDescription(true));
+                if (speechError.getErrorCode() == 10116) {
+                    onIdentifyListener.onRegisterSuccess();
+                }
+            }
+
+            @Override
+            public void onEvent(int i, int i1, int i2, Bundle bundle) {
+
+            }
+        });
+    }
+
+    private void deleteStaff(String id_staff) {
+        // sst=add，auth_id=eqhe，group_id=123456，scope=person
+        mIdVerifier.setParameter(SpeechConstant.PARAMS, null);
+        // 设置会话场景
+        mIdVerifier.setParameter(SpeechConstant.MFV_SCENES, "ipt");
+        // 用户id
+        mIdVerifier.setParameter(SpeechConstant.AUTH_ID, id_staff);
+
+        // 设置模型参数，若无可以传空字符传
+        StringBuffer params2 = new StringBuffer();
+
+        params2.append("scope=person");
+        params2.append(",auth_id=" + id_staff);
+        params2.append(",group_id=" + pGroupId);
+        // 执行模型操作
+        mIdVerifier.execute("ipt", "delete", params2.toString(), mEnrollListener);
+    }
+
+    /**
+     * 人脸注册,删除监听器
+     */
+    private IdentityListener mEnrollListener = new IdentityListener() {
+
+        @Override
+        public void onResult(IdentityResult result, boolean islast) {
+            Log.d(TAG, result.getResultString());
+            UserIdentify groupManagerBack = new Gson().fromJson(result.getResultString(), UserIdentify.class);
+            if (groupManagerBack.getRet() == ErrorCode.SUCCESS) {
+                onIdentifyListener.onRegisterSuccess();
+            } else {
+                LogToastUtils.log(TAG, new SpeechError(groupManagerBack.getRet()).getPlainDescription(true));
+            }
+        }
+
+        @Override
+        public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
+        }
+
+        @Override
+        public void onError(SpeechError error) {
+            LogToastUtils.log(TAG, error.getPlainDescription(true));
+        }
+
+    };
+
     //返回照片的JPEG格式的数据
     private Camera.PictureCallback jpegCallback = new Camera.PictureCallback() {
 
+
         public void onPictureTaken(byte[] data, Camera camera) {
             if (null != data) {
-                mProDialog.setMessage("正在识别...");
-                mProDialog.show();
-                // 清空参数
-                mIdVerifier.setParameter(SpeechConstant.PARAMS, "");
-                // 设置业务场景
-                mIdVerifier.setParameter(SpeechConstant.MFV_SCENES, "ifr");
-                // 设置业务类型
-                mIdVerifier.setParameter(SpeechConstant.MFV_SST, "identify");
-                // 设置监听器，开始会话
-                mIdVerifier.startWorking(mSearchListener);
+                if (MAIN_CHECK_CAMERA_TYPE == type) {
+                    mProDialog.setMessage("正在识别...");
+                    mProDialog.show();
+                    // 清空参数
+                    mIdVerifier.setParameter(SpeechConstant.PARAMS, "");
+                    // 设置业务场景
+                    mIdVerifier.setParameter(SpeechConstant.MFV_SCENES, "ifr");
+                    // 设置业务类型
+                    mIdVerifier.setParameter(SpeechConstant.MFV_SST, "identify");
+                    // 设置监听器，开始会话
+                    mIdVerifier.startWorking(mSearchListener);
 
-                // 子业务执行参数，若无可以传空字符传
-                StringBuffer params = new StringBuffer();
-                params.append(",group_id=" + Constant.pGroupId + ",topc=3");
-                // 向子业务写入数据，人脸数据可以一次写入
-                mIdVerifier.writeData("ifr", params.toString(), data, 0, data.length);
-                // 写入完毕
-                mIdVerifier.stopWrite("ifr");
+                    // 子业务执行参数，若无可以传空字符传
+                    StringBuffer params = new StringBuffer();
+                    params.append(",group_id=" + Constant.pGroupId + ",topc=3");
+                    // 向子业务写入数据，人脸数据可以一次写入
+                    mIdVerifier.writeData("ifr", params.toString(), data, 0, data.length);
+                    // 写入完毕
+                    mIdVerifier.stopWrite("ifr");
+                } else {
+                    setData(data);
+
+
+                    onIdentifyListener.onCapture();
+
+                    //
+                }
             } else {
                 LogToastUtils.toastShort(context, "请选择图片后再鉴别");
             }
@@ -293,12 +494,13 @@ public class IdentifyFace {
         public void onError(SpeechError error) {
             dismissProDialog();
 
-            LogToastUtils.toastShort(context, error.getPlainDescription(true));
+            LogToastUtils.log(TAG, error.getPlainDescription(true));
             mTts.startSpeaking("没有检测到人脸", null);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mCamera.startPreview();
+                    if (mCamera != null)
+                        mCamera.startPreview();
                 }
             }, 3000);
         }
@@ -312,6 +514,11 @@ public class IdentifyFace {
     }
 
 
+    /**
+     * 人脸识别返回结果处理
+     *
+     * @param result 返回结果
+     */
     protected void handleResult(IdentityResult result) {
         if (null == result) {
             return;
@@ -325,25 +532,28 @@ public class IdentifyFace {
         UserIdentify userIdentify = gson.fromJson(resultStr, UserIdentify.class);
         if (ErrorCode.SUCCESS == userIdentify.getRet()) {
             if (userIdentify.getIfv_result().getCandidates().get(0).getScore() > pScoreDivider) {
-
-                LogToastUtils.toastShort(context, userIdentify.getIfv_result().getCandidates().get(0).getUser() + "您已经上班");
+                LogToastUtils.log(TAG, userIdentify.getIfv_result().getCandidates().get(0).getUser() + "您已经上班");
                 onIdentifyListener.onSuccess(userIdentify.getIfv_result().getCandidates().get(0).getUser());
+
                 mTts.startSpeaking(userIdentify.getIfv_result().getCandidates().get(0).getUser() + "，早上好！新的一天开始了，好好工作哦！", null);
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mCamera.startPreview();
+                        if (mCamera != null)
+                            mCamera.startPreview();
                     }
                 }, 3000);
 
+
             } else {
-                LogToastUtils.toastShort(context, "不存在此人，是否跳转到互动模式");
+                LogToastUtils.log(TAG, "不存在此人，是否跳转到互动模式");
                 mTts.startSpeaking("不存在此人，是否跳转到互动模式", null);
                 onIdentifyListener.onSwitch();
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mCamera.startPreview();
+                        if (mCamera != null)
+                            mCamera.startPreview();
                     }
                 }, 3000);
             }
@@ -351,12 +561,13 @@ public class IdentifyFace {
 //                LogToastUtils.log(TAG, resultStr);
 
         } else {
-            LogToastUtils.toastShort(context, "识别失败！");
+            LogToastUtils.log(TAG, "识别失败！");
             onIdentifyListener.onError();
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mCamera.startPreview();
+                    if (mCamera != null)
+                        mCamera.startPreview();
                 }
             }, 3000);
         }
@@ -406,11 +617,16 @@ public class IdentifyFace {
         return matrix;
     }
 
+    //回调接口
     public interface OnIdentifyListener {
         void onSuccess(String user_id);
 
         void onSwitch();
 
         void onError();
+
+        void onCapture();
+
+        void onRegisterSuccess();
     }
 }
