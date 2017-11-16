@@ -56,7 +56,8 @@ public class AdminActivity extends CommonActivity implements View.OnClickListene
                 startActivity(intent);
                 break;
             case R.id.time_manage:
-
+                Intent intent2 = new Intent(this, TimeManageActivity.class);
+                startActivity(intent2);
                 break;
             case R.id.dialog_manage:
 

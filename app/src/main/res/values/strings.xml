@@ -12,9 +12,9 @@
     <string name="staff_position">职位</string>
     <string name="sign_up_time">打卡时间</string>
     <string name="sign_up_type">打卡类型</string>
-    <string name="welcome_type">接待类型</string>
-    <string name="welcome_station">工位</string>
-    <string name="welcome_room">会议室</string>
+    <string name="welcome_type">是否离职</string>
+    <string name="welcome_station">否</string>
+    <string name="welcome_room">是</string>
     <string name="record_face_or_no">是否录入人脸</string>
     <string name="face_has_recorded">已录入</string>
     <string name="face_not_record">未录入</string>
@@ -29,11 +29,25 @@
     <string name="staff_edit">编辑员工</string>
     <string name="staff_face_record">人脸录入</string>
     <string name="time_manage">时间管理</string>
+    <string name="time_on_time">上班时间</string>
+    <string name="time_off_time">下班时间</string>
+    <string name="time_add_time">加班时间</string>
+    <string name="time_late_min">迟到区间(分钟)</string>
+    <string name="time_early_min">早退区间(分钟)</string>
     <string name="dialog_manage">会话管理</string>
     <string name="pass_manage">密码修改</string>
+    <string name="account_access">用户登陆</string>
+    <string name="login_account">账号</string>
+    <string name="login_password">密码</string>
+    <string name="login_goto">登陆</string>
+    <string name="input_orial_pass">请输入原密码</string>
+    <string name="input_new_pass">请输入新密码</string>
+    <string name="input_new_pass_again">请再次输入新密码</string>
     <string name="com_message">企业信息</string>
     <string name="back_change">主题切换</string>
     <string name="back_goto">返回</string>
     <string name="tts_toast_format" formatted="false">缓冲进度为%d%%，播放进度为%d%%</string>
+    <string name="title_activity_login">请登录</string>
+
 
 </resources>

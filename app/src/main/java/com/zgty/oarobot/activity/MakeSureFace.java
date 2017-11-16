@@ -65,10 +65,10 @@ public class MakeSureFace extends CommonSActivity implements View.OnClickListene
     }
 
     private void initView() {
-        camera_preview = (FrameLayout) findViewById(R.id.camera_preview);
-        edit_cancel = (TextView) findViewById(R.id.edit_cancel);
-        edit_sure = (TextView) findViewById(R.id.edit_sure);
-        edit_sure_cancel = (LinearLayout) findViewById(R.id.edit_sure_cancel);
+        camera_preview = findViewById(R.id.camera_preview);
+        edit_cancel = findViewById(R.id.edit_cancel);
+        edit_sure = findViewById(R.id.edit_sure);
+        edit_sure_cancel = findViewById(R.id.edit_sure_cancel);
         edit_cancel.setOnClickListener(this);
         edit_sure.setOnClickListener(this);
     }
@@ -107,6 +107,8 @@ public class MakeSureFace extends CommonSActivity implements View.OnClickListene
             @Override
             public void onRegisterSuccess() {
                 LogToastUtils.toastShort(getApplicationContext(), "注册成功!");
+
+                setResult(22);
                 finish();
             }
         });

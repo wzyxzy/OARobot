@@ -32,7 +32,6 @@ import java.io.IOException;
 import static com.zgty.oarobot.common.Constant.MAIN_CHECK_CAMERA_TYPE;
 import static com.zgty.oarobot.common.Constant.pGroupId;
 import static com.zgty.oarobot.common.Constant.pScoreDivider;
-import static com.zgty.oarobot.common.OARobotApplication.mTts;
 
 /**
  * Created by zy on 2017/11/6.
@@ -259,7 +258,7 @@ public class IdentifyFace {
                 //拍照，并上传到讯飞
 
                 try {
-                    camera.takePicture(shutterCallback, null, jpegCallback);
+                    camera.takePicture(null, null, jpegCallback);
                     camera.stopPreview();
 
                 } catch (Exception e) {
@@ -495,14 +494,22 @@ public class IdentifyFace {
             dismissProDialog();
 
             LogToastUtils.log(TAG, error.getPlainDescription(true));
-            mTts.startSpeaking("没有检测到人脸", null);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (mCamera != null)
-                        mCamera.startPreview();
-                }
-            }, 3000);
+            if (error.getErrorCode() == 10116) {//没有录入
+                onIdentifyListener.onSwitch();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mCamera != null)
+                            mCamera.startPreview();
+                    }
+                }, 15000);
+            } else {
+//                mTts.startSpeaking("没有检测到人脸", null);
+                if (mCamera != null)
+                    mCamera.startPreview();
+
+            }
+
         }
 
     };
@@ -532,22 +539,19 @@ public class IdentifyFace {
         UserIdentify userIdentify = gson.fromJson(resultStr, UserIdentify.class);
         if (ErrorCode.SUCCESS == userIdentify.getRet()) {
             if (userIdentify.getIfv_result().getCandidates().get(0).getScore() > pScoreDivider) {
-                LogToastUtils.log(TAG, userIdentify.getIfv_result().getCandidates().get(0).getUser() + "您已经上班");
                 onIdentifyListener.onSuccess(userIdentify.getIfv_result().getCandidates().get(0).getUser());
 
-                mTts.startSpeaking(userIdentify.getIfv_result().getCandidates().get(0).getUser() + "，早上好！新的一天开始了，好好工作哦！", null);
+//                mTts.startSpeaking(userIdentify.getIfv_result().getCandidates().get(0).getUser() + "，您打卡成功了！", null);
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (mCamera != null)
                             mCamera.startPreview();
                     }
-                }, 3000);
+                }, 5000);
 
 
-            } else {
-                LogToastUtils.log(TAG, "不存在此人，是否跳转到互动模式");
-                mTts.startSpeaking("不存在此人，是否跳转到互动模式", null);
+            } else {//没有过阈值
                 onIdentifyListener.onSwitch();
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -555,7 +559,7 @@ public class IdentifyFace {
                         if (mCamera != null)
                             mCamera.startPreview();
                     }
-                }, 3000);
+                }, 15000);
             }
 //                LogToastUtils.toastShort(context, resultStr);
 //                LogToastUtils.log(TAG, resultStr);
@@ -563,13 +567,8 @@ public class IdentifyFace {
         } else {
             LogToastUtils.log(TAG, "识别失败！");
             onIdentifyListener.onError();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (mCamera != null)
-                        mCamera.startPreview();
-                }
-            }, 3000);
+            if (mCamera != null)
+                mCamera.startPreview();
         }
 
     }

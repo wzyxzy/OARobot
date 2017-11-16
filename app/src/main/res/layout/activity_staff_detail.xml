@@ -58,7 +58,8 @@
 
                 <EditText
                     android:id="@+id/name_staff_english"
-                    style="@style/AppTextView5" />
+                    style="@style/AppTextView5"
+                    android:digits="abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" />
 
                 <TextView
                     style="@style/AppTextView4"
@@ -67,6 +68,7 @@
                 <EditText
                     android:id="@+id/id_staff"
                     style="@style/AppTextView5"
+                    android:digits="0123456789"
                     android:inputType="number" />
             </LinearLayout>
 
@@ -83,6 +85,7 @@
                 <EditText
                     android:id="@+id/telephone_num"
                     style="@style/AppTextView5"
+                    android:digits="0123456789"
                     android:inputType="number" />
 
                 <TextView

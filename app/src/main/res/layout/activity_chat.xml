@@ -42,5 +42,15 @@
         android:id="@+id/chat_goon"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="8" />
+        android:layout_weight="8"
+        android:visibility="gone" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="8"
+        android:text="该功能正在建设中。。。"
+        android:gravity="center"
+        android:textSize="@dimen/main_big_size"
+        android:textColor="@color/yellowText" />
 </LinearLayout>

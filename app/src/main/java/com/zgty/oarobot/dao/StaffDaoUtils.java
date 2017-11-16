@@ -20,14 +20,15 @@ import java.util.List;
 public class StaffDaoUtils {
     private Context context;
     private SQLiteDatabase writableDatabase;
-    private SQLiteDatabase readableDatabase;
+    private StaffDao staffDao;
 
 
     public StaffDaoUtils(Context context) {
         this.context = context;
         writableDatabase = DBManager.getInstance(context).getWritableDatabase();
-        readableDatabase = DBManager.getInstance(context).getReadableDatabase();
-
+        DaoMaster daoMaster = new DaoMaster(writableDatabase);
+        DaoSession daoSession = daoMaster.newSession();
+        staffDao = daoSession.getStaffDao();
     }
 
 
@@ -38,9 +39,7 @@ public class StaffDaoUtils {
      */
     public void insertStaff(Staff staff) {
 
-        DaoMaster daoMaster = new DaoMaster(writableDatabase);
-        DaoSession daoSession = daoMaster.newSession();
-        StaffDao staffDao = daoSession.getStaffDao();
+
         staffDao.insert(staff);
     }
 
@@ -53,9 +52,7 @@ public class StaffDaoUtils {
         if (staffs == null || staffs.isEmpty()) {
             return;
         }
-        DaoMaster daoMaster = new DaoMaster(writableDatabase);
-        DaoSession daoSession = daoMaster.newSession();
-        StaffDao staffDao = daoSession.getStaffDao();
+
         staffDao.insertInTx(staffs);
     }
 
@@ -65,14 +62,12 @@ public class StaffDaoUtils {
      * @param staff
      */
     public void deleteStaff(Staff staff) {
-        DaoMaster daoMaster = new DaoMaster(writableDatabase);
-        DaoSession daoSession = daoMaster.newSession();
-        StaffDao staffDao = daoSession.getStaffDao();
+
         staffDao.delete(staff);
     }
 
     public void deleteUser(String userId) {
-        QueryBuilder<Staff> qb = new DaoMaster(writableDatabase).newSession().getStaffDao().queryBuilder();
+        QueryBuilder<Staff> qb = staffDao.queryBuilder();
         DeleteQuery<Staff> bd = qb.where(StaffDao.Properties.Id.eq(userId)).buildDelete();
         bd.executeDeleteWithoutDetachingEntities();
     }
@@ -83,9 +78,6 @@ public class StaffDaoUtils {
      * @param staff
      */
     public void updateStaff(Staff staff) {
-        DaoMaster daoMaster = new DaoMaster(writableDatabase);
-        DaoSession daoSession = daoMaster.newSession();
-        StaffDao staffDao = daoSession.getStaffDao();
         staffDao.update(staff);
     }
 
@@ -93,9 +85,6 @@ public class StaffDaoUtils {
      * 查询用户列表
      */
     public List<Staff> queryStaffList() {
-        DaoMaster daoMaster = new DaoMaster(writableDatabase);
-        DaoSession daoSession = daoMaster.newSession();
-        StaffDao staffDao = daoSession.getStaffDao();
         QueryBuilder<Staff> qb = staffDao.queryBuilder();
         List<Staff> staffList = qb.list();
         return staffList;
@@ -105,9 +94,6 @@ public class StaffDaoUtils {
      * 查询用户列表
      */
     public List<Staff> queryStaffList(String id) {
-        DaoMaster daoMaster = new DaoMaster(writableDatabase);
-        DaoSession daoSession = daoMaster.newSession();
-        StaffDao staffDao = daoSession.getStaffDao();
         QueryBuilder<Staff> qb = staffDao.queryBuilder();
         qb.where(StaffDao.Properties.Id.eq(id));
         List<Staff> list = qb.list();

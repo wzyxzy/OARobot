@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/background2"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_main_padding"
+    tools:context="com.zgty.oarobot.activity.LoginActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/back_admin"
+            style="@style/AppBack" />
+
+        <TextView
+            android:id="@+id/title_name"
+            style="@style/AppTextView3"
+            android:text="@string/account_access"
+            android:textColor="@color/yellowText"
+            android:textSize="@dimen/main_type_size" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/account_name"
+            style="@style/AppTextView4"
+            android:text="@string/login_account" />
+
+        <EditText
+            android:id="@+id/login_account"
+            style="@style/AppTextView6" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/password_name"
+            style="@style/AppTextView4"
+            android:text="@string/login_password" />
+
+        <EditText
+            android:id="@+id/login_password"
+            style="@style/AppTextView6"
+            android:inputType="textPassword" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:visibility="invisible">
+
+        <TextView
+            style="@style/AppTextView4"
+            android:text="@string/input_new_pass_again" />
+
+        <EditText
+            android:id="@+id/input_new_pass_again"
+            style="@style/AppTextView6"
+            android:inputType="textPassword" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edit_sure_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginLeft="@dimen/staff_item_height"
+        android:layout_marginRight="@dimen/staff_item_height"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/edit_cancel"
+            style="@style/AppTextView4"
+            android:clickable="true"
+            android:drawableLeft="@mipmap/cancel"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:paddingLeft="@dimen/photo_main_padding"
+            android:text="@string/cancel_name"
+            android:textColor="@color/redText" />
+
+        <TextView
+            android:id="@+id/edit_sure"
+            style="@style/AppTextView4"
+            android:clickable="true"
+            android:drawableLeft="@mipmap/sure"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:paddingLeft="@dimen/photo_main_padding"
+            android:text="@string/login_goto"
+            android:textColor="@color/greenText" />
+    </LinearLayout>
+</LinearLayout>

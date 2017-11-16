@@ -7,6 +7,7 @@ import org.greenrobot.greendao.annotation.Property;
 
 /**
  * Created by zy on 2017/11/2.
+ * 员工表
  */
 @Entity
 public class Staff {
