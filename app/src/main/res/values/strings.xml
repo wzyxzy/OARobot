@@ -35,6 +35,8 @@
     <string name="time_late_min">迟到区间(分钟)</string>
     <string name="time_early_min">早退区间(分钟)</string>
     <string name="dialog_manage">会话管理</string>
+    <string name="dialog_scene">场景</string>
+    <string name="dialog_text">内容</string>
     <string name="pass_manage">密码修改</string>
     <string name="account_access">用户登陆</string>
     <string name="login_account">账号</string>

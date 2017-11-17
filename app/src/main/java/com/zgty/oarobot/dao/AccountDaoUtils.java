@@ -12,19 +12,15 @@ import org.greenrobot.greendao.query.QueryBuilder;
 
 /**
  * Created by zy on 2017/11/3.
+ * 管理员账户表管理
  */
 
 public class AccountDaoUtils {
-    private Context context;
-    private SQLiteDatabase writableDatabase;
-    private SQLiteDatabase readableDatabase;
     private AccountDao accountDao;
 
 
     public AccountDaoUtils(Context context) {
-        this.context = context;
-        writableDatabase = DBManager.getInstance(context).getWritableDatabase();
-        readableDatabase = DBManager.getInstance(context).getReadableDatabase();
+        SQLiteDatabase writableDatabase = DBManager.getInstance(context).getWritableDatabase();
         DaoMaster daoMaster = new DaoMaster(writableDatabase);
         DaoSession daoSession = daoMaster.newSession();
         accountDao = daoSession.getAccountDao();
@@ -34,7 +30,7 @@ public class AccountDaoUtils {
     /**
      * 插入用户
      *
-     * @param account
+     * @param account 账户
      */
     public void insertAccountList(Account account) {
         if (account == null) {
@@ -47,7 +43,7 @@ public class AccountDaoUtils {
     /**
      * 更新账户
      *
-     * @param account
+     * @param account 用户账户
      */
     public void updateAccount(Account account) {
         if (account == null) {

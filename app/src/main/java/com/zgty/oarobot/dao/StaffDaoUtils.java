@@ -15,17 +15,15 @@ import java.util.List;
 
 /**
  * Created by zy on 2017/11/3.
+ * 员工表管理
  */
 
 public class StaffDaoUtils {
-    private Context context;
-    private SQLiteDatabase writableDatabase;
     private StaffDao staffDao;
 
 
     public StaffDaoUtils(Context context) {
-        this.context = context;
-        writableDatabase = DBManager.getInstance(context).getWritableDatabase();
+        SQLiteDatabase writableDatabase = DBManager.getInstance(context).getWritableDatabase();
         DaoMaster daoMaster = new DaoMaster(writableDatabase);
         DaoSession daoSession = daoMaster.newSession();
         staffDao = daoSession.getStaffDao();
@@ -35,7 +33,7 @@ public class StaffDaoUtils {
     /**
      * 插入一条记录
      *
-     * @param staff
+     * @param staff 员工
      */
     public void insertStaff(Staff staff) {
 
@@ -46,7 +44,7 @@ public class StaffDaoUtils {
     /**
      * 插入用户集合
      *
-     * @param staffs
+     * @param staffs 员工集合
      */
     public void insertStaffList(List<Staff> staffs) {
         if (staffs == null || staffs.isEmpty()) {
@@ -59,7 +57,7 @@ public class StaffDaoUtils {
     /**
      * 删除一条记录
      *
-     * @param staff
+     * @param staff 员工
      */
     public void deleteStaff(Staff staff) {
 
@@ -75,7 +73,7 @@ public class StaffDaoUtils {
     /**
      * 更新一条记录
      *
-     * @param staff
+     * @param staff 员工
      */
     public void updateStaff(Staff staff) {
         staffDao.update(staff);
@@ -86,8 +84,7 @@ public class StaffDaoUtils {
      */
     public List<Staff> queryStaffList() {
         QueryBuilder<Staff> qb = staffDao.queryBuilder();
-        List<Staff> staffList = qb.list();
-        return staffList;
+        return qb.list();
     }
 
     /**
@@ -96,7 +93,6 @@ public class StaffDaoUtils {
     public List<Staff> queryStaffList(String id) {
         QueryBuilder<Staff> qb = staffDao.queryBuilder();
         qb.where(StaffDao.Properties.Id.eq(id));
-        List<Staff> list = qb.list();
-        return list;
+        return qb.list();
     }
 }

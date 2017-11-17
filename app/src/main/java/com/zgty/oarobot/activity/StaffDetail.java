@@ -212,14 +212,13 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
         staff.setName_part(part);
         staff.setName_position(position);
         staff.setUser_type(String.valueOf(welcome_type.getSelectedItemPosition()));
-        staff.setRecordFace(false);
+
         if (firstAdd) {
             staff_id = english + id_clerk;
             staff.setId(staff_id);
-        }
-
-        if (firstAdd) {
+            staff.setRecordFace(false);
             new StaffDaoUtils(this).insertStaff(staff);
+            firstAdd = false;
         } else {
             try {
                 new StaffDaoUtils(this).updateStaff(staff);
@@ -227,7 +226,7 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                 LogToastUtils.toastShort(this, e.getMessage());
             }
         }
-        firstAdd = false;
+
         handler.sendEmptyMessage(0);
         makeStaffCannotEdit();
 

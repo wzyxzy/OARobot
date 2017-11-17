@@ -14,17 +14,15 @@ import java.util.List;
 
 /**
  * Created by zy on 2017/11/3.
+ * 时间表
  */
 
 public class TimeDaoUtils {
-    private Context context;
-    private SQLiteDatabase writableDatabase;
     private TimeDao timeDao;
 
 
     public TimeDaoUtils(Context context) {
-        this.context = context;
-        writableDatabase = DBManager.getInstance(context).getWritableDatabase();
+        SQLiteDatabase writableDatabase = DBManager.getInstance(context).getWritableDatabase();
         DaoMaster daoMaster = new DaoMaster(writableDatabase);
         DaoSession daoSession = daoMaster.newSession();
         timeDao = daoSession.getTimeDao();
@@ -34,7 +32,7 @@ public class TimeDaoUtils {
     /**
      * 插入时间集合
      *
-     * @param times
+     * @param times 时间集合
      */
     public void insertTimeList(List<Time> times) {
         if (times == null || times.isEmpty()) {
@@ -47,7 +45,7 @@ public class TimeDaoUtils {
     /**
      * 更新时间集合
      *
-     * @param times
+     * @param times 时间集合
      */
     public void updateStaff(List<Time> times) {
         if (times == null || times.isEmpty()) {
@@ -61,8 +59,7 @@ public class TimeDaoUtils {
      */
     public List<Time> queryTimeList() {
         QueryBuilder<Time> qb = timeDao.queryBuilder();
-        List<Time> timeList = qb.list();
-        return timeList;
+        return qb.list();
     }
 
     /**
@@ -71,7 +68,6 @@ public class TimeDaoUtils {
     public List<Time> queryTimeList(String id) {
         QueryBuilder<Time> qb = timeDao.queryBuilder();
         qb.where(TimeDao.Properties.Id.eq(id));
-        List<Time> list = qb.list();
-        return list;
+        return qb.list();
     }
 }

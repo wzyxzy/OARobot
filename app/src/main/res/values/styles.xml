@@ -51,6 +51,30 @@
         <item name="android:textColor">@color/whiteText</item>
     </style>
 
+    <style name="AppTextView7">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">2</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_margin">@dimen/activity_main_padding</item>
+        <item name="android:imeOptions">actionDone</item>
+        <item name="android:background">@null</item>
+        <item name="android:textSize">@dimen/edit_text_size</item>
+        <item name="android:textColor">@color/whiteText</item>
+    </style>
+
+    <style name="AppTextView8">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">2</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_margin">@dimen/activity_main_padding</item>
+        <item name="android:imeOptions">actionDone</item>
+        <item name="android:background">@null</item>
+        <item name="android:textSize">@dimen/edit_text_size</item>
+        <item name="android:textColor">@color/whiteText</item>
+    </style>
+
     <style name="AppTextStaffItem">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">match_parent</item>

@@ -23,10 +23,12 @@ import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.SynthesizerListener;
 import com.zgty.oarobot.R;
 import com.zgty.oarobot.bean.Account;
+import com.zgty.oarobot.bean.Speaking;
 import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.bean.Time;
 import com.zgty.oarobot.common.CommonActivity;
 import com.zgty.oarobot.dao.AccountDaoUtils;
+import com.zgty.oarobot.dao.SpeekDaoUtils;
 import com.zgty.oarobot.dao.StaffDaoUtils;
 import com.zgty.oarobot.dao.TimeDaoUtils;
 import com.zgty.oarobot.util.IdentifyFace;
@@ -69,7 +71,8 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private int noanswer = 0;
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int REQUEST_CAMERA_CODE = 0x100;
+
+    private SpeekDaoUtils speekDaoUtils;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -82,11 +85,11 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
 
                     break;
                 case 1:
-                    robotSpeek("我还不认识您，请问您找谁?", 1);
+                    robotSpeek(speekDaoUtils.querySpeekingText("cannotRecognise"), 1);
 
                     break;
                 case 2:
-                    robotSpeek("欢迎使用中广通业打卡系统", 0);
+                    robotSpeek(speekDaoUtils.querySpeekingText("welcomeText"), 0);
                     mIat = SpeechRecognizer.createRecognizer(getApplicationContext(), mInitListener);
                     onResume();
                     //启动本地引擎
@@ -263,19 +266,19 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 boolean hasPerson = false;
                 for (int i1 = 0; i1 < staffList.size(); i1++) {
                     if (text.contains(staffList.get(i1).getName_user())) {
-                        robotSpeek(String.format("正在为您联系%s,请稍后！", staffList.get(i1).getName_user()), 2);
+                        robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2);
                         hasPerson = true;
                         break;
                     }
                 }
                 if (!hasPerson) {
-                    robotSpeek("没有找到您所找的人，请您自行联系", 0);
+                    robotSpeek(speekDaoUtils.querySpeekingText("connectByYourself"), 0);
                 }
                 break;
             case 1:
                 noanswer++;
                 if (noanswer < 3) {
-                    robotSpeek("我没有听清您说的话，请问您找谁？", 1);
+                    robotSpeek(speekDaoUtils.querySpeekingText("cannotHearingClear"), 1);
                 }
 
                 break;
@@ -295,6 +298,10 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 break;
             case 2:
                 //微信联系
+                mTts.startSpeaking(s, null);
+                break;
+            case 3:
+                //微信联系人事
                 mTts.startSpeaking(s, null);
                 break;
         }
@@ -354,6 +361,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     @Override
     protected void onResume() {
         super.onResume();
+        initInfo();
         initTime();
         initAcoount();
         if (identifyFace == null) {
@@ -391,6 +399,49 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             }
         });
 
+    }
+
+    private void initInfo() {
+        name_staff.setText("");
+        id_staff.setText("");
+        name_part.setText("");
+        sign_up_time.setText("");
+        station_state.setText("");
+        speekDaoUtils = new SpeekDaoUtils(this);
+        List<Speaking> speakings = speekDaoUtils.querySpeekList();
+        if (speakings == null || speakings.size() == 0) {
+            speakings = new ArrayList<>();
+            Speaking speaking1 = new Speaking("welcomeText", "打开软件欢迎语", "欢迎使用中广通业打卡系统");
+            Speaking speaking2 = new Speaking("timeOnNormal", "正常上班", "%s，早上好，新的一天开始了，祝您工作好心情！");
+            Speaking speaking3 = new Speaking("timeOnLate", "上班迟到", "%s，您今天迟到了，相信您以后不会再迟到了！");
+            Speaking speaking4 = new Speaking("goOutNormal", "中途外出", "%s，请您通过！");
+            Speaking speaking5 = new Speaking("timeOffEarly", "下班早退", "%s，还没有下班呢，不能早退哦！");
+            Speaking speaking6 = new Speaking("timeOffNormal", "正常下班", "%s，工作辛苦了，下班后让自己放松下！");
+            Speaking speaking7 = new Speaking("timeAddNormal", "正常加班", "%s，您辛苦了，都加班这么晚了！");
+            Speaking speaking8 = new Speaking("cannotRecognise", "陌生人", "我还不认识您，请问您找谁?");
+            Speaking speaking9 = new Speaking("cannotHearingClear", "没有听清", "我没有听清您说的话，请问您找谁？");
+            Speaking speaking10 = new Speaking("connectForYou", "开始联系", "正在为您联系%s,请稍后！");
+            Speaking speaking11 = new Speaking("connectedSuccess", "联系成功", "请到xxx会议室！");
+            Speaking speaking12 = new Speaking("connectByYourself", "查无此人", "没有找到您所找的人，请您自行联系");
+            Speaking speaking13 = new Speaking("connectFailed", "没有应答", "对方没有应答，请您自行联系");
+            Speaking speaking14 = new Speaking("getOffStaff", "离职人员", "%s，您已离职，正在为您联系人事！");
+            speakings.add(speaking1);
+            speakings.add(speaking2);
+            speakings.add(speaking3);
+            speakings.add(speaking4);
+            speakings.add(speaking5);
+            speakings.add(speaking6);
+            speakings.add(speaking7);
+            speakings.add(speaking8);
+            speakings.add(speaking9);
+            speakings.add(speaking10);
+            speakings.add(speaking11);
+            speakings.add(speaking12);
+            speakings.add(speaking13);
+            speakings.add(speaking14);
+
+            speekDaoUtils.insertSpeekList(speakings);
+        }
     }
 
     private void initAcoount() {
@@ -449,6 +500,10 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         List<Staff> staffList = new StaffDaoUtils(this).queryStaffList(userid);
         if (staffList != null && staffList.size() > 0) {
             Staff staff = staffList.get(0);
+            if (staff.getUser_type().equals("1")) {
+                robotSpeek(String.format(speekDaoUtils.querySpeekingText("getOffStaff"), staff.getName_user()), 3);
+                return;
+            }
             name_staff.setText(staff.getName_user());
             id_staff.setText(staff.getId_clerk());
             name_part.setText(staff.getName_part());
@@ -469,22 +524,22 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         String type = "";
         if (timenow >= timeadd) {
             type = "加班";
-            robotSpeek(String.format("%s，您辛苦了，都加班这么晚了！", staff.getName_user()), 0);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeAddNormal"), staff.getName_user()), 0);
         } else if (timenow >= timeoff) {
             type = "正常下班";
-            robotSpeek(String.format("%s，工作辛苦了，下班后让自己放松下！", staff.getName_user()), 0);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOffNormal"), staff.getName_user()), 0);
         } else if (timenow > timeoffearly) {
             type = "早退";
-            robotSpeek(String.format("%s，还没有下班呢，不能早退哦！", staff.getName_user()), 0);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOffEarly"), staff.getName_user()), 0);
         } else if (timenow > timeonlate) {
             type = "中途外出";
-            robotSpeek(String.format("%s，请您通过！", staff.getName_user()), 0);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("goOutNormal"), staff.getName_user()), 0);
         } else if (timenow > timeon) {
             type = "迟到";
-            robotSpeek(String.format("%s，您今天迟到了，相信您以后不会再迟到了！", staff.getName_user()), 0);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOnLate"), staff.getName_user()), 0);
         } else {
             type = "正常上班";
-            robotSpeek(String.format("%s，早上好，新的一天开始了，祝您工作好心情！", staff.getName_user()), 0);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOnNormal"), staff.getName_user()), 0);
         }
 
 
@@ -507,7 +562,8 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 startActivity(intent);
                 break;
             case R.id.setting_main:
-                intent = new Intent(this, AdminActivity.class);
+                intent = new Intent(this, LoginActivity.class);
+                intent.putExtra("type", 1);
                 startActivity(intent);
                 break;
         }
@@ -529,10 +585,30 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
 
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mTts != null) {
+            mTts.stopSpeaking();
+        }
+        if (mIat != null) {
+            mIat.stopListening();
+
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         identifyFace.finisheIdentify();
         identifyFace = null;
+        if (mTts != null) {
+            mTts.destroy();
+        }
+        if (mIat != null) {
+            mIat.destroy();
+
+        }
+
 
     }
 }

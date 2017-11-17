@@ -37,5 +37,6 @@ public class Constant {
 
     public static final int MAIN_CHECK_CAMERA_TYPE = 0;//验证
     public static final int MAIN_RECORD_CAMERA_TYPE = 1;//录入
+    public static String nowAccount;//当前登陆用户
 
 }

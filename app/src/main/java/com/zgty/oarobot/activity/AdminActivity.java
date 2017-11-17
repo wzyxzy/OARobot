@@ -10,6 +10,8 @@ import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.common.CommonActivity;
 import com.zgty.oarobot.dao.StaffDaoUtils;
 
+import static com.zgty.oarobot.common.Constant.nowAccount;
+
 public class AdminActivity extends CommonActivity implements View.OnClickListener {
 
     private TextView staff_manage;
@@ -49,21 +51,25 @@ public class AdminActivity extends CommonActivity implements View.OnClickListene
 
     @Override
     public void onClick(View v) {
+        Intent intent;
         switch (v.getId()) {
             case R.id.staff_manage:
 //                insertStaff();
-                Intent intent = new Intent(this, StaffManager.class);
+                intent = new Intent(this, StaffManager.class);
                 startActivity(intent);
                 break;
             case R.id.time_manage:
-                Intent intent2 = new Intent(this, TimeManageActivity.class);
-                startActivity(intent2);
+                intent = new Intent(this, TimeManageActivity.class);
+                startActivity(intent);
                 break;
             case R.id.dialog_manage:
-
+                intent = new Intent(this, SpeekManage.class);
+                startActivity(intent);
                 break;
             case R.id.pass_manage:
-
+                intent = new Intent(this, LoginActivity.class);
+                intent.putExtra("type", 2);
+                startActivity(intent);
                 break;
             case R.id.com_message:
 
@@ -75,6 +81,12 @@ public class AdminActivity extends CommonActivity implements View.OnClickListene
                 finish();
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        nowAccount = null;
     }
 
     private void insertStaff() {
