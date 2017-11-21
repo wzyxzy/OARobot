@@ -6,7 +6,7 @@ package com.zgty.oarobot.common;
  */
 
 public class Constant {
-    public static String pGroupId = "3231485008";
+    public static String pGroupId = "3242786592";
     public static double pScoreDivider = 80.0;
 
     public static String pSpeeker_xiaoyan = "xiaoyan";//小燕	青年    女声	中英文     （普通话）（系统默认）

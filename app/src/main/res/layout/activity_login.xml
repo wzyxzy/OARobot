@@ -39,7 +39,8 @@
 
         <EditText
             android:id="@+id/login_account"
-            style="@style/AppTextView7" />
+            style="@style/AppTextView7"
+            android:background="@color/whiteText" />
 
 
     </LinearLayout>
@@ -58,6 +59,7 @@
         <EditText
             android:id="@+id/login_password"
             style="@style/AppTextView7"
+            android:background="@color/whiteText"
             android:inputType="textPassword" />
 
     </LinearLayout>
@@ -77,6 +79,7 @@
         <EditText
             android:id="@+id/input_new_pass_again"
             style="@style/AppTextView7"
+            android:background="@color/whiteText"
             android:inputType="textPassword" />
     </LinearLayout>
 

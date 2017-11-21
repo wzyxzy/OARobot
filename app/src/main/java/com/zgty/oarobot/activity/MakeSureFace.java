@@ -106,7 +106,7 @@ public class MakeSureFace extends CommonSActivity implements View.OnClickListene
 
             @Override
             public void onRegisterSuccess() {
-                LogToastUtils.toastShort(getApplicationContext(), "注册成功!");
+                LogToastUtils.toastShort(getApplicationContext(), "录入成功!");
 
                 setResult(22);
                 finish();

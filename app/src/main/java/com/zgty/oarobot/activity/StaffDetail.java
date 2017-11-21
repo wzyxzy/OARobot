@@ -107,12 +107,14 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
             if (staff.getIsRecordFace()) {
                 record_face_or_no.setTextColor(getResources().getColor(R.color.greenText));
                 record_face_or_no.setText(getResources().getString(R.string.face_has_recorded));
-                record_face.setVisibility(View.INVISIBLE);
+//                record_face.setVisibility(View.INVISIBLE);
+                record_face.setText("人脸重录");
 
             } else {
                 record_face_or_no.setTextColor(getResources().getColor(R.color.redText));
                 record_face_or_no.setText(getResources().getString(R.string.face_not_record));
-                record_face.setVisibility(View.VISIBLE);
+//                record_face.setVisibility(View.VISIBLE);
+                record_face.setText("人脸录入");
 
             }
 //            welcome_type.setText(staff.getName_position());
@@ -276,7 +278,7 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                         public void onYesClick() {
                             myDialog.dismiss();
                             new StaffDaoUtils(getApplicationContext()).deleteStaff(staff);
-                            deleteFace();
+                            deleteFace(true);
                         }
                     });
                     myDialog.setNoOnclickListener("取消", new MyDialog.onNoOnclickListener() {
@@ -303,18 +305,25 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                 //编辑员工
                 if (firstAdd) {
                     LogToastUtils.toastShort(this, "请先保存后再操作！");
-                } else {
+                    return;
+                }
+                if (staff.getIsRecordFace()){
+                    //重新录入，先删除再录入
+                    deleteFace(false);
+                }else {
                     Intent intent = new Intent(this, MakeSureFace.class);
                     intent.putExtra("staff_id", staff_id);
                     startActivityForResult(intent, 11);
                 }
+
+
 
                 break;
 
         }
     }
 
-    private void deleteFace() {
+    private void deleteFace(final boolean isFinish) {
         if (identifyFace == null) {
             identifyFace = new IdentifyFace(this);
             identifyFace.deleteFace(staff_id);
@@ -342,7 +351,14 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                 @Override
                 public void onRegisterSuccess() {
 //                    LogToastUtils.toastShort(getApplication(), "员工删除成功！");
-                    finish();
+                    if (isFinish){
+                        finish();
+
+                    }else {
+                        Intent intent = new Intent(getApplicationContext(), MakeSureFace.class);
+                        intent.putExtra("staff_id", staff_id);
+                        startActivityForResult(intent, 11);
+                    }
 
                 }
             });

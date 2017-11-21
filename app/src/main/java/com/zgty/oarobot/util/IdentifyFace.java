@@ -349,6 +349,45 @@ public class IdentifyFace {
      * @param id_staff 员工id
      */
     public void deleteFace(final String id_staff) {
+        // sst=add，auth_id=eqhe，group_id=123456，scope=person
+        mIdVerifier.setParameter(SpeechConstant.PARAMS, null);
+        // 设置会话场景
+        mIdVerifier.setParameter(SpeechConstant.MFV_SCENES, "ipt");
+        // 用户id
+        mIdVerifier.setParameter(SpeechConstant.AUTH_ID, id_staff);
+
+        // 设置模型参数，若无可以传空字符传
+        StringBuffer params2 = new StringBuffer();
+
+        params2.append("scope=person");
+        params2.append(",auth_id=" + id_staff);
+        params2.append(",group_id=" + pGroupId);
+        // 执行模型操作
+        mIdVerifier.execute("ipt", "delete", params2.toString(), new IdentityListener() {
+            @Override
+            public void onResult(IdentityResult result, boolean islast) {
+                Log.d(TAG, result.getResultString());
+                UserIdentify groupManagerBack = new Gson().fromJson(result.getResultString(), UserIdentify.class);
+                if (groupManagerBack.getRet() == ErrorCode.SUCCESS) {
+                    deleteStaff(id_staff);
+                } else {
+                    LogToastUtils.log(TAG, new SpeechError(groupManagerBack.getRet()).getPlainDescription(true));
+                }
+            }
+
+            @Override
+            public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
+            }
+
+            @Override
+            public void onError(SpeechError error) {
+                LogToastUtils.log(TAG, error.getPlainDescription(true));
+            }
+        });
+
+    }
+
+    private void deleteStaff(String id_staff) {
         // 清空参数
         mIdVerifier.setParameter(SpeechConstant.PARAMS, null);
         // 设置会话场景
@@ -365,7 +404,8 @@ public class IdentifyFace {
                 Log.d(TAG, identityResult.getResultString());
                 UserIdentify groupManagerBack = new Gson().fromJson(identityResult.getResultString(), UserIdentify.class);
                 if (groupManagerBack.getRet() == ErrorCode.SUCCESS) {
-                    deleteStaff(id_staff);
+                    onIdentifyListener.onRegisterSuccess();
+//                    deleteStaff(id_staff);
                 } else {
                     LogToastUtils.log(TAG, new SpeechError(groupManagerBack.getRet()).getPlainDescription(true));
                 }
@@ -384,24 +424,6 @@ public class IdentifyFace {
 
             }
         });
-    }
-
-    private void deleteStaff(String id_staff) {
-        // sst=add，auth_id=eqhe，group_id=123456，scope=person
-        mIdVerifier.setParameter(SpeechConstant.PARAMS, null);
-        // 设置会话场景
-        mIdVerifier.setParameter(SpeechConstant.MFV_SCENES, "ipt");
-        // 用户id
-        mIdVerifier.setParameter(SpeechConstant.AUTH_ID, id_staff);
-
-        // 设置模型参数，若无可以传空字符传
-        StringBuffer params2 = new StringBuffer();
-
-        params2.append("scope=person");
-        params2.append(",auth_id=" + id_staff);
-        params2.append(",group_id=" + pGroupId);
-        // 执行模型操作
-        mIdVerifier.execute("ipt", "delete", params2.toString(), mEnrollListener);
     }
 
     /**

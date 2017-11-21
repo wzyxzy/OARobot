@@ -264,6 +264,11 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 String text = String.valueOf(robot_speak_text.getText());
                 List<Staff> staffList = new StaffDaoUtils(this).queryStaffList();
                 boolean hasPerson = false;
+                if (text.contains("打卡")) {
+                    identifyFace.startCameraView();
+                    robotSpeek("现在已经可以打卡了!", 0);
+                    return;
+                }
                 for (int i1 = 0; i1 < staffList.size(); i1++) {
                     if (text.contains(staffList.get(i1).getName_user())) {
                         robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2);
@@ -307,6 +312,13 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         }
         robot_speak_text.setTextColor(getResources().getColor(R.color.colorAccent));
         robot_speak_text.setText(s);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                robot_speak_text.setText("");
+
+            }
+        }, 5000);
     }
 
     /**
@@ -401,12 +413,16 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
 
     }
 
-    private void initInfo() {
+    private void clearText() {
         name_staff.setText("");
         id_staff.setText("");
         name_part.setText("");
         sign_up_time.setText("");
         station_state.setText("");
+    }
+
+    private void initInfo() {
+        clearText();
         speekDaoUtils = new SpeekDaoUtils(this);
         List<Speaking> speakings = speekDaoUtils.querySpeekList();
         if (speakings == null || speakings.size() == 0) {
@@ -511,6 +527,14 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             timenow = changeTimeToDouble(nowtime);
             sign_up_time.setText(nowtime);
             station_state.setText(getType(staff));
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    clearText();
+                    robot_speak_text.setText("");
+
+                }
+            }, 5000);
 
         } else {
             LogToastUtils.toastShort(this, "没有录入该信息");

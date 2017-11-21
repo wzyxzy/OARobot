@@ -34,7 +34,8 @@
             android:gravity="center"
             android:text="@string/mode_change"
             android:textColor="@color/greenText"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout
