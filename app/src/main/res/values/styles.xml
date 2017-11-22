@@ -17,6 +17,7 @@
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="android:textColor">@color/whiteText</item>
+        <item name="android:textSize">@dimen/edit_text_size</item>
     </style>
 
     <style name="AppTextView4">
@@ -24,6 +25,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
+        <item name="android:textSize">@dimen/edit_text_size</item>
     </style>
 
     <style name="AppTextView5">
@@ -97,6 +99,7 @@
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="android:textColor">@color/whiteText</item>
+        <item name="android:textSize">@dimen/edit_text_size</item>
     </style>
 
     <style name="AppTextView3">
@@ -109,13 +112,14 @@
     <style name="AppBack">
         <item name="android:layout_width">@dimen/back_width</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:gravity">center</item>
+        <item name="android:gravity">center_vertical</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="android:drawableLeft">@mipmap/back48</item>
         <item name="android:paddingLeft">@dimen/activity_main_padding</item>
         <item name="android:text">@string/back_goto</item>
         <item name="android:textColor">@color/greenText</item>
+        <item name="android:textSize">@dimen/edit_text_size</item>
     </style>
 
     <style name="noticeDialogStyle" parent="android:Theme.Dialog">

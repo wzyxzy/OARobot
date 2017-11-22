@@ -2,6 +2,8 @@ package com.zgty.oarobot.util;
 
 import android.content.Context;
 
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
 import com.tencent.mm.opensdk.modelmsg.WXTextObject;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
@@ -24,5 +26,12 @@ public class WeiXinUtils {
     public void SendText(String text) {
         WXTextObject textObject = new WXTextObject();
         textObject.text = text;
+        WXMediaMessage msg = new WXMediaMessage();
+        msg.mediaObject = textObject;
+        msg.description = text;
+        SendMessageToWX.Req req = new SendMessageToWX.Req();
+        req.transaction = String.valueOf(System.currentTimeMillis());
+        req.message = msg;
+        iwxapi.sendReq(req);
     }
 }

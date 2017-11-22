@@ -34,6 +34,7 @@ import com.zgty.oarobot.dao.TimeDaoUtils;
 import com.zgty.oarobot.util.IdentifyFace;
 import com.zgty.oarobot.util.JsonParser;
 import com.zgty.oarobot.util.LogToastUtils;
+import com.zgty.oarobot.util.WeiXinUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -304,6 +305,8 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             case 2:
                 //微信联系
                 mTts.startSpeaking(s, null);
+                WeiXinUtils weiXinUtils = new WeiXinUtils(this);
+                weiXinUtils.SendText("前台有人找您，他的照片发给您");
                 break;
             case 3:
                 //微信联系人事

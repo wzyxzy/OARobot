@@ -27,8 +27,6 @@ import com.zgty.oarobot.bean.UserIdentify;
 import com.zgty.oarobot.common.Constant;
 import com.zgty.oarobot.widget.DrawFacesView;
 
-import java.io.IOException;
-
 import static com.zgty.oarobot.common.Constant.MAIN_CHECK_CAMERA_TYPE;
 import static com.zgty.oarobot.common.Constant.pGroupId;
 import static com.zgty.oarobot.common.Constant.pScoreDivider;
@@ -131,12 +129,12 @@ public class IdentifyFace {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 if (mCamera == null) {
-                    mCamera = Camera.open(1);
+                    mCamera = Camera.open();
                     try {
                         mCamera.setFaceDetectionListener(new FaceDetectorListener());
                         mCamera.setPreviewDisplay(holder);
                         startFaceDetection();
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -175,10 +173,13 @@ public class IdentifyFace {
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                mCamera.stopPreview();
-                mCamera.release();
-                mCamera = null;
-                holder = null;
+                if (mCamera!=null){
+                    mCamera.stopPreview();
+                    mCamera.release();
+                    mCamera = null;
+                    holder = null;
+                }
+
             }
         });
     }

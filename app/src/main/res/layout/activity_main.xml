@@ -165,10 +165,11 @@
             android:layout_weight="1"
             android:clickable="true"
             android:drawableRight="@mipmap/goto48"
-            android:gravity="center"
+            android:gravity="center_vertical|right"
             android:paddingRight="@dimen/activity_setting_padding"
             android:text="@string/setting_type"
-            android:textColor="@color/greenText" />
+            android:textColor="@color/greenText"
+            android:textSize="@dimen/edit_text_size" />
     </LinearLayout>
 
 </LinearLayout>
