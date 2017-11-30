@@ -92,7 +92,7 @@ public class MakeSureFace extends CommonSActivity implements View.OnClickListene
             }
 
             @Override
-            public void onSwitch() {
+            public void onSwitch(byte[] b) {
             }
 
             @Override

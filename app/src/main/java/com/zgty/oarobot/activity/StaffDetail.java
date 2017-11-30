@@ -334,7 +334,7 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                 }
 
                 @Override
-                public void onSwitch() {
+                public void onSwitch(byte[] b) {
 
                 }
 

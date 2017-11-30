@@ -9,7 +9,6 @@ import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -129,7 +128,7 @@ public class IdentifyFace {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 if (mCamera == null) {
-                    mCamera = Camera.open();
+                    mCamera = Camera.open(1);
                     try {
                         mCamera.setFaceDetectionListener(new FaceDetectorListener());
                         mCamera.setPreviewDisplay(holder);
@@ -460,9 +459,9 @@ public class IdentifyFace {
 
         public void onPictureTaken(byte[] data, Camera camera) {
             if (null != data) {
+                setData(data);
                 if (MAIN_CHECK_CAMERA_TYPE == type) {
-                    mProDialog.setMessage("正在识别...");
-                    mProDialog.show();
+
                     // 清空参数
                     mIdVerifier.setParameter(SpeechConstant.PARAMS, "");
                     // 设置业务场景
@@ -480,7 +479,7 @@ public class IdentifyFace {
                     // 写入完毕
                     mIdVerifier.stopWrite("ifr");
                 } else {
-                    setData(data);
+
 
 
                     onIdentifyListener.onCapture();
@@ -502,7 +501,6 @@ public class IdentifyFace {
         public void onResult(IdentityResult result, boolean islast) {
             Log.d(TAG, result.getResultString());
 
-            dismissProDialog();
 
             handleResult(result);
         }
@@ -514,18 +512,17 @@ public class IdentifyFace {
 
         @Override
         public void onError(SpeechError error) {
-            dismissProDialog();
 
             LogToastUtils.log(TAG, error.getPlainDescription(true));
             if (error.getErrorCode() == 10116) {//没有录入
-                onIdentifyListener.onSwitch();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mCamera != null)
-                            mCamera.startPreview();
-                    }
-                }, 15000);
+                onIdentifyListener.onSwitch(data);
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (mCamera != null)
+//                            mCamera.startPreview();
+//                    }
+//                }, 15000);
             } else {
 //                mTts.startSpeaking("没有检测到人脸", null);
                 if (mCamera != null)
@@ -565,24 +562,24 @@ public class IdentifyFace {
                 onIdentifyListener.onSuccess(userIdentify.getIfv_result().getCandidates().get(0).getUser());
 
 //                mTts.startSpeaking(userIdentify.getIfv_result().getCandidates().get(0).getUser() + "，您打卡成功了！", null);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mCamera != null)
-                            mCamera.startPreview();
-                    }
-                }, 5000);
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (mCamera != null)
+//                            mCamera.startPreview();
+//                    }
+//                }, 5000);
 
 
             } else {//没有过阈值
-                onIdentifyListener.onSwitch();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mCamera != null)
-                            mCamera.startPreview();
-                    }
-                }, 15000);
+                onIdentifyListener.onSwitch(data);
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (mCamera != null)
+//                            mCamera.startPreview();
+//                    }
+//                }, 15000);
             }
 //                LogToastUtils.toastShort(context, resultStr);
 //                LogToastUtils.log(TAG, resultStr);
@@ -643,7 +640,7 @@ public class IdentifyFace {
     public interface OnIdentifyListener {
         void onSuccess(String user_id);
 
-        void onSwitch();
+        void onSwitch(byte[] b);
 
         void onError();
 

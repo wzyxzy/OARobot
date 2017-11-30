@@ -6,6 +6,9 @@ package com.zgty.oarobot.common;
  */
 
 public class Constant {
+    public static final long REFRESHTTIME = 3000;
+    public static final long WAITINGTIME = 60000;
+    public static final String BROADCASTACTION = "com.zgty.oarobot";
     public static String pGroupId = "3242786592";
     public static double pScoreDivider = 80.0;
 

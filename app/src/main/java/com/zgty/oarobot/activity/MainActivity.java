@@ -2,12 +2,16 @@ package com.zgty.oarobot.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -27,15 +31,19 @@ import com.zgty.oarobot.bean.Speaking;
 import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.bean.Time;
 import com.zgty.oarobot.common.CommonActivity;
+import com.zgty.oarobot.common.Constant;
 import com.zgty.oarobot.dao.AccountDaoUtils;
 import com.zgty.oarobot.dao.SpeekDaoUtils;
 import com.zgty.oarobot.dao.StaffDaoUtils;
 import com.zgty.oarobot.dao.TimeDaoUtils;
+import com.zgty.oarobot.service.RefreshService;
+import com.zgty.oarobot.util.FileUtils;
 import com.zgty.oarobot.util.IdentifyFace;
 import com.zgty.oarobot.util.JsonParser;
 import com.zgty.oarobot.util.LogToastUtils;
-import com.zgty.oarobot.util.WeiXinUtils;
+import com.zgty.oarobot.util.WXCPUtils;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,6 +82,10 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private SpeekDaoUtils speekDaoUtils;
+    private File file;
+    private Intent intentRefreshService;
+    private RefreshListBroadCast listBroadCast;
+    private WXCPUtils wxcpUtils;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -90,9 +102,10 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
 
                     break;
                 case 2:
-                    robotSpeek(speekDaoUtils.querySpeekingText("welcomeText"), 0);
+//                    robotSpeek(speekDaoUtils.querySpeekingText("welcomeText"), 0);
                     mIat = SpeechRecognizer.createRecognizer(getApplicationContext(), mInitListener);
                     onResume();
+
                     //启动本地引擎
 //					String path = ResourceUtil.TTS_RES_PATH+"="+ ResourceLoader.getResPath(this,mSharedPreferences,"tts")+","+ResourceUtil.ENGINE_START+"=tts";
 //					Boolean  ret = SpeechUtility.getUtility().setParameter(ResourceUtil.ENGINE_START,path);
@@ -266,12 +279,12 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 List<Staff> staffList = new StaffDaoUtils(this).queryStaffList();
                 boolean hasPerson = false;
                 if (text.contains("打卡")) {
-                    identifyFace.startCameraView();
                     robotSpeek("现在已经可以打卡了!", 0);
                     return;
                 }
                 for (int i1 = 0; i1 < staffList.size(); i1++) {
                     if (text.contains(staffList.get(i1).getName_user())) {
+                        userid = staffList.get(i1).getId();
                         robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2);
                         hasPerson = true;
                         break;
@@ -285,6 +298,8 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 noanswer++;
                 if (noanswer < 3) {
                     robotSpeek(speekDaoUtils.querySpeekingText("cannotHearingClear"), 1);
+                } else {
+                    identifyFace.startCameraView();
                 }
 
                 break;
@@ -294,8 +309,49 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private void robotSpeek(String s, int type) {
         switch (type) {
             case 0:
-                mTts.startSpeaking(s, null);
 
+                mTts.startSpeaking(s, new SynthesizerListener() {
+                    @Override
+                    public void onSpeakBegin() {
+
+                    }
+
+                    @Override
+                    public void onBufferProgress(int i, int i1, int i2, String s) {
+
+                    }
+
+                    @Override
+                    public void onSpeakPaused() {
+
+                    }
+
+                    @Override
+                    public void onSpeakResumed() {
+
+                    }
+
+                    @Override
+                    public void onSpeakProgress(int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onCompleted(SpeechError speechError) {
+                        if (speechError == null) {
+                            showTip("播放完成");
+                            identifyFace.startCameraView();
+
+                        } else if (speechError != null) {
+                            showTip(speechError.getPlainDescription(true));
+                        }
+                    }
+
+                    @Override
+                    public void onEvent(int i, int i1, int i2, Bundle bundle) {
+
+                    }
+                });
                 break;
             case 1:
                 //mTtsListener
@@ -304,9 +360,74 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 break;
             case 2:
                 //微信联系
-                mTts.startSpeaking(s, null);
-                WeiXinUtils weiXinUtils = new WeiXinUtils(this);
-                weiXinUtils.SendText("前台有人找您，他的照片发给您");
+                mTts.startSpeaking(s, new SynthesizerListener() {
+                    @Override
+                    public void onSpeakBegin() {
+
+                    }
+
+                    @Override
+                    public void onBufferProgress(int i, int i1, int i2, String s) {
+
+                    }
+
+                    @Override
+                    public void onSpeakPaused() {
+
+                    }
+
+                    @Override
+                    public void onSpeakResumed() {
+
+                    }
+
+                    @Override
+                    public void onSpeakProgress(int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onCompleted(SpeechError speechError) {
+                        if (speechError == null) {
+                            showTip("播放完成");
+//                            WeiXinUtils weiXinUtils = new WeiXinUtils(getApplicationContext());
+//                            weiXinUtils.SendText("前台有人找您，他的照片发给您");
+
+
+                            wxcpUtils.sendText(file, userid, "前台有人找您，您是否同意让他进来？");
+                            wxcpUtils.setOnWXCPUtilsListener(new WXCPUtils.OnWXCPUtilsListener() {
+                                @Override
+                                public void onSuccess() {
+                                    robotSpeek("已经为您通知，请等候!", 0);
+                                    intentRefreshService = new Intent();
+                                    intentRefreshService.setClass(getApplicationContext(), RefreshService.class);
+                                    intentRefreshService.putExtra("userid", userid);
+                                    startService(intentRefreshService);
+                                    listBroadCast = new RefreshListBroadCast();
+                                    IntentFilter filter = new IntentFilter();
+                                    filter.addAction(Constant.BROADCASTACTION);
+                                    registerReceiver(listBroadCast, filter);
+
+                                }
+
+                                @Override
+                                public void onError() {
+                                    robotSpeek("不好意思，没有为您通知成功!", 0);
+                                }
+                            });
+
+                        } else {
+                            showTip(speechError.getPlainDescription(true));
+                        }
+
+                    }
+
+                    @Override
+                    public void onEvent(int i, int i1, int i2, Bundle bundle) {
+
+                    }
+                });
+
                 break;
             case 3:
                 //微信联系人事
@@ -368,8 +489,9 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         setContentView(R.layout.activity_main);
         requestPermissions();
         initView();
+        wxcpUtils = new WXCPUtils(this);
         handler.sendEmptyMessage(2);
-
+        requestPermissions();
     }
 
 
@@ -393,7 +515,8 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             }
 
             @Override
-            public void onSwitch() {
+            public void onSwitch(byte[] data) {
+                file = FileUtils.getFileFromBytes(data);
                 LogToastUtils.log(TAG, "switch");
                 handler.sendEmptyMessage(1);
             }
@@ -440,7 +563,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             Speaking speaking8 = new Speaking("cannotRecognise", "陌生人", "我还不认识您，请问您找谁?");
             Speaking speaking9 = new Speaking("cannotHearingClear", "没有听清", "我没有听清您说的话，请问您找谁？");
             Speaking speaking10 = new Speaking("connectForYou", "开始联系", "正在为您联系%s,请稍后！");
-            Speaking speaking11 = new Speaking("connectedSuccess", "联系成功", "请到xxx会议室！");
+            Speaking speaking11 = new Speaking("connectedSuccess", "联系成功", "请到%s！");
             Speaking speaking12 = new Speaking("connectByYourself", "查无此人", "没有找到您所找的人，请您自行联系");
             Speaking speaking13 = new Speaking("connectFailed", "没有应答", "对方没有应答，请您自行联系");
             Speaking speaking14 = new Speaking("getOffStaff", "离职人员", "%s，您已离职，正在为您联系人事！");
@@ -491,8 +614,9 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        handler.sendEmptyMessage(2);
     }
 
     private void initView() {
@@ -529,7 +653,11 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             String nowtime = getNowTime();
             timenow = changeTimeToDouble(nowtime);
             sign_up_time.setText(nowtime);
-            station_state.setText(getType(staff));
+            String type = getType(staff);
+            station_state.setText(type);
+            if (!type.equalsIgnoreCase("中途外出")) {
+                wxcpUtils.sendText(null, userid, "姓名：" + staff.getName_user() + "\\n工号：" + staff.getId_clerk() + "\\n部门：" + staff.getName_part() + "\\n打卡时间：" + nowtime + "\\n打卡类型：" + type);
+            }
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -635,7 +763,46 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             mIat.destroy();
 
         }
+        if (intentRefreshService != null) {
+            stopService(intentRefreshService);
+            intentRefreshService = null;
+        }
+        if (listBroadCast != null) {
+            unregisterReceiver(listBroadCast);
+            listBroadCast = null;
+        }
+    }
 
 
+    private class RefreshListBroadCast extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intentRefreshService != null) {
+
+                stopService(intentRefreshService);
+                intentRefreshService = null;
+            }
+            if (listBroadCast != null) {
+                unregisterReceiver(listBroadCast);
+                listBroadCast = null;
+            }
+            String result = intent.getStringExtra("result");
+            switch (result){
+                case "agree":
+                    robotSpeek("对方已经接受了您的请求，请通过!", 0);
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    break;
+                case "reject":
+                    robotSpeek("对方已经拒绝了您的请求，请您自行联系!", 0);
+                    wxcpUtils.sendText(null, userid, "已经拒绝对方！");
+                    break;
+                case "timeout":
+                    robotSpeek("超过一分钟没有答复，请您自行联系!", 0);
+                    wxcpUtils.sendText(null, userid, "您超过一分钟没有回复，该信息已经失效！");
+                    break;
+            }
+
+
+        }
     }
 }

@@ -2,6 +2,8 @@
     <string name="app_name">OARobot</string>
     <string name="app_id">59f2e233</string>
     <string name="weixin_app_id">wx05626de9f0d9b313</string>
+    <string name="weixin_corp_id">ww4c0daf999a9d1a67</string>
+    <string name="weixin_corpsecret">7RjCgxYwaBpLwIgedn_oMA0lI5fJkP8oTz7jD6MiW-g</string>
     <string name="oa_mode_name">考勤模式</string>
     <string name="chat_mode_name">互动模式</string>
     <string name="mode_change">模式切换</string>

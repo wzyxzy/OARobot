@@ -36,5 +36,6 @@ dependencies {
     implementation files('libs/Msc.jar')
     implementation files('libs/Sunflower.jar')
     implementation 'com.google.code.gson:gson:2.8.2'
+    compile 'com.lzy.net:okgo:3.0.4'
     compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
 }

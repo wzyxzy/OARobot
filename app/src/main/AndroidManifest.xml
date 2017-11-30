@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.zgty.oarobot">
 
     <!-- 连接网络权限，用于执行云端语音能力 -->
@@ -34,6 +35,9 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission
+        android:name="android.permission.INJECT_EVENTS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:name=".common.OARobotApplication"
@@ -90,10 +94,16 @@
             android:launchMode="singleTop"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:name=".activity.SpeekManage"
+        <activity
+            android:name=".activity.SpeekManage"
             android:launchMode="singleTop"
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <service
+            android:name=".service.RefreshService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
