@@ -15,8 +15,6 @@ import com.zgty.oarobot.common.Constant;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.zgty.oarobot.common.Constant.WAITINGTIME;
-
 public class RefreshService extends Service {
 
     private boolean waitingData;
@@ -41,18 +39,24 @@ public class RefreshService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         final String userid = intent.getStringExtra("userid");
-        timelong = System.currentTimeMillis();
+//        timelong = System.currentTimeMillis();
         timer = new Timer();
+
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                if (timelong + WAITINGTIME > System.currentTimeMillis()) {
-                    while (waitingData) {
+//                if (timelong + WAITINGTIME > System.currentTimeMillis()) {
+                    if (waitingData) {
                         getDataFromWX(userid);
+//                        try {
+//                            Thread.sleep(Constant.REFRESHTTIME);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
                     }
-                } else {
-                    callbackfinish("timeout");
-                }
+//                } else {
+//                    callbackfinish("timeout");
+//                }
             }
         };
         timer.schedule(timerTask, 0, Constant.REFRESHTTIME);
@@ -86,11 +90,7 @@ public class RefreshService extends Service {
             public void onSuccess(Response<String> response) {
                 GetAccessBack getAccessBack = new Gson().fromJson(response.body(), GetAccessBack.class);
                 if (getAccessBack.getCode() == 0) {
-                    if (getAccessBack.getResult().equalsIgnoreCase("agree") ||
-                            getAccessBack.getResult().equalsIgnoreCase("reject")) {
-                        callbackfinish(getAccessBack.getResult());
-
-                    }
+                    callbackfinish(getAccessBack.getResult());
                 }
             }
 
@@ -108,7 +108,7 @@ public class RefreshService extends Service {
         onDestroy();
     }
 
-    private void stopTimer(){
+    private void stopTimer() {
 
         if (timer != null) {
             timer.cancel();

@@ -787,9 +787,25 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 listBroadCast = null;
             }
             String result = intent.getStringExtra("result");
-            switch (result){
-                case "agree":
-                    robotSpeek("对方已经接受了您的请求，请通过!", 0);
+            switch (result) {
+                case "worktable":
+                    robotSpeek("对方已经接受了您的请求，请您直接去他的工位或办公室!", 0);
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    break;
+                case "combig":
+                    robotSpeek("对方已经接受了您的请求，请您到大会议室等候!", 0);
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    break;
+                case "comsmall":
+                    robotSpeek("对方已经接受了您的请求，请您到小会议室等候!", 0);
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    break;
+                case "talk1":
+                    robotSpeek("对方已经接受了您的请求，请您到洽谈室1等候!", 0);
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    break;
+                case "talk2":
+                    robotSpeek("对方已经接受了您的请求，请您到洽谈室2等候!", 0);
                     wxcpUtils.sendText(null, userid, "已经让对方通过！");
                     break;
                 case "reject":
