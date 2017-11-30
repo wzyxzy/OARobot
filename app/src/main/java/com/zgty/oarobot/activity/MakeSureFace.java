@@ -97,6 +97,7 @@ public class MakeSureFace extends CommonSActivity implements View.OnClickListene
 
             @Override
             public void onError() {
+                LogToastUtils.toastShort(getApplicationContext(), "没有检测到人脸!");
             }
 
             @Override

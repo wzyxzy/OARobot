@@ -307,15 +307,14 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                     LogToastUtils.toastShort(this, "请先保存后再操作！");
                     return;
                 }
-                if (staff.getIsRecordFace()){
+                if (staff.getIsRecordFace()) {
                     //重新录入，先删除再录入
                     deleteFace(false);
-                }else {
+                } else {
                     Intent intent = new Intent(this, MakeSureFace.class);
                     intent.putExtra("staff_id", staff_id);
                     startActivityForResult(intent, 11);
                 }
-
 
 
                 break;
@@ -324,45 +323,45 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
     }
 
     private void deleteFace(final boolean isFinish) {
-        if (identifyFace == null) {
+        if (identifyFace == null)
             identifyFace = new IdentifyFace(this);
-            identifyFace.deleteFace(staff_id);
-            identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {
-                @Override
-                public void onSuccess(String user_id) {
+        identifyFace.deleteFace(staff_id);
+        identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {
+            @Override
+            public void onSuccess(String user_id) {
 
-                }
+            }
 
-                @Override
-                public void onSwitch(byte[] b) {
+            @Override
+            public void onSwitch(byte[] b) {
 
-                }
+            }
 
-                @Override
-                public void onError() {
+            @Override
+            public void onError() {
 
-                }
+            }
 
-                @Override
-                public void onCapture() {
+            @Override
+            public void onCapture() {
 
-                }
+            }
 
-                @Override
-                public void onRegisterSuccess() {
+            @Override
+            public void onRegisterSuccess() {
 //                    LogToastUtils.toastShort(getApplication(), "员工删除成功！");
-                    if (isFinish){
-                        finish();
+                if (isFinish) {
+                    finish();
 
-                    }else {
-                        Intent intent = new Intent(getApplicationContext(), MakeSureFace.class);
-                        intent.putExtra("staff_id", staff_id);
-                        startActivityForResult(intent, 11);
-                    }
-
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), MakeSureFace.class);
+                    intent.putExtra("staff_id", staff_id);
+                    startActivityForResult(intent, 11);
                 }
-            });
-        }
+
+            }
+        });
+
     }
 
     private void makeStaffCanEdit() {

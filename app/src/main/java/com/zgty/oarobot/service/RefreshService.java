@@ -11,6 +11,7 @@ import com.lzy.okgo.model.Response;
 import com.zgty.oarobot.R;
 import com.zgty.oarobot.bean.GetAccessBack;
 import com.zgty.oarobot.common.Constant;
+import com.zgty.oarobot.util.LogToastUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -20,7 +21,7 @@ public class RefreshService extends Service {
     private boolean waitingData;
     private Timer timer;
     private TimerTask timerTask;
-    private long timelong;
+    private TimerTask timerTaskOne;
 
 
     public RefreshService() {
@@ -39,44 +40,27 @@ public class RefreshService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         final String userid = intent.getStringExtra("userid");
-//        timelong = System.currentTimeMillis();
         timer = new Timer();
 
+        timerTaskOne = new TimerTask() {
+            @Override
+            public void run() {
+                callbackfinish("timeout");
+            }
+        };
+        timer.schedule(timerTaskOne, Constant.WAITINGTIME);
         timerTask = new TimerTask() {
             @Override
             public void run() {
-//                if (timelong + WAITINGTIME > System.currentTimeMillis()) {
-                    if (waitingData) {
-                        getDataFromWX(userid);
-//                        try {
-//                            Thread.sleep(Constant.REFRESHTTIME);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-                    }
-//                } else {
-//                    callbackfinish("timeout");
-//                }
+                if (waitingData) {
+                    getDataFromWX(userid);
+
+                }
+
             }
         };
         timer.schedule(timerTask, 0, Constant.REFRESHTTIME);
-//        while (waitingData) {
-//            new Handler().postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    getDataFromWX(userid);
-//
-//                }
-//            }, Constant.REFRESHTTIME);
-//        }
-////        getDataFromWX(userid);
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                callbackfinish("timeout");
-//
-//            }
-//        }, Constant.WAITINGTIME);
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -88,6 +72,7 @@ public class RefreshService extends Service {
                 .params("createTime", System.currentTimeMillis() / 1000 - 5).execute(new StringCallback() {
             @Override
             public void onSuccess(Response<String> response) {
+                LogToastUtils.log(RefreshService.class, response.body());
                 GetAccessBack getAccessBack = new Gson().fromJson(response.body(), GetAccessBack.class);
                 if (getAccessBack.getCode() == 0) {
                     callbackfinish(getAccessBack.getResult());
@@ -119,6 +104,10 @@ public class RefreshService extends Service {
             timerTask.cancel();
             timerTask = null;
         }
+        if (timerTaskOne != null) {
+            timerTaskOne.cancel();
+            timerTaskOne = null;
+        }
 
 
     }
@@ -126,6 +115,6 @@ public class RefreshService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        stopTimer();
+
     }
 }

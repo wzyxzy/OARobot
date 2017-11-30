@@ -655,9 +655,9 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             sign_up_time.setText(nowtime);
             String type = getType(staff);
             station_state.setText(type);
-            if (!type.equalsIgnoreCase("中途外出")) {
-                wxcpUtils.sendText(null, userid, "姓名：" + staff.getName_user() + "\\n工号：" + staff.getId_clerk() + "\\n部门：" + staff.getName_part() + "\\n打卡时间：" + nowtime + "\\n打卡类型：" + type);
-            }
+//            if (!type.equalsIgnoreCase("中途外出")) {
+//                wxcpUtils.sendText(null, userid, "姓名：" + staff.getName_user() + "\n工号：" + staff.getId_clerk() + "\n部门：" + staff.getName_part() + "\n打卡时间：" + nowtime + "\n打卡类型：" + type);
+//            }
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {

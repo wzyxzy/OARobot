@@ -382,6 +382,9 @@ public class IdentifyFace {
             @Override
             public void onError(SpeechError error) {
                 LogToastUtils.log(TAG, error.getPlainDescription(true));
+                if (error.getErrorCode()==10142){
+                    deleteStaff(id_staff);
+                }
             }
         });
 
@@ -449,6 +452,9 @@ public class IdentifyFace {
         @Override
         public void onError(SpeechError error) {
             LogToastUtils.log(TAG, error.getPlainDescription(true));
+            if (error.getErrorCode()==11700){
+                onIdentifyListener.onError();
+            }
         }
 
     };
