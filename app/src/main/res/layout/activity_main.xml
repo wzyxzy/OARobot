@@ -8,35 +8,50 @@
     android:orientation="vertical"
     tools:context="com.zgty.oarobot.activity.MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2">
 
         <TextView
             android:id="@+id/mode_name"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="3"
+            android:layout_centerInParent="true"
             android:gravity="center"
             android:text="@string/oa_mode_name"
             android:textColor="@color/yellowText"
             android:textSize="@dimen/main_type_size" />
 
         <TextView
-            android:id="@+id/change_mode"
-            android:layout_width="0dp"
+            android:id="@+id/waiting_text"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="@dimen/activity_main_padding"
             android:layout_marginRight="@dimen/activity_main_padding"
-            android:layout_weight="1"
+            android:gravity="center"
+            android:text="正在为您联系中，已等待1秒"
+            android:textSize="@dimen/edit_text_size"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/change_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/activity_main_padding"
+            android:layout_marginRight="@dimen/activity_main_padding"
             android:clickable="true"
+            android:drawableEnd="@mipmap/change48"
             android:drawableRight="@mipmap/change48"
+            android:focusable="true"
             android:gravity="center"
             android:text="@string/mode_change"
             android:textColor="@color/greenText"
             android:textSize="18sp"
             android:visibility="gone" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -26,6 +26,7 @@ public class DaoMaster extends AbstractDaoMaster {
         AccountDao.createTable(db, ifNotExists);
         SpeakingDao.createTable(db, ifNotExists);
         AccessTokenWXDao.createTable(db, ifNotExists);
+        WorkOnOffDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
@@ -35,6 +36,7 @@ public class DaoMaster extends AbstractDaoMaster {
         AccountDao.dropTable(db, ifExists);
         SpeakingDao.dropTable(db, ifExists);
         AccessTokenWXDao.dropTable(db, ifExists);
+        WorkOnOffDao.dropTable(db, ifExists);
     }
 
     /**
@@ -58,6 +60,7 @@ public class DaoMaster extends AbstractDaoMaster {
         registerDaoClass(AccountDao.class);
         registerDaoClass(SpeakingDao.class);
         registerDaoClass(AccessTokenWXDao.class);
+        registerDaoClass(WorkOnOffDao.class);
     }
 
     public DaoSession newSession() {

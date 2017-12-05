@@ -62,6 +62,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private TextView sign_up_time;
     private TextView station_state;
     private FrameLayout camera_preview;
+    private TextView waiting_text;
 
     private TextView name_part;
     private TextView robot_speak_text;
@@ -78,6 +79,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     // 语音听写对象
     private SpeechRecognizer mIat;
     private int noanswer = 0;
+    private int time_second;
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -86,6 +88,9 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private Intent intentRefreshService;
     private RefreshListBroadCast listBroadCast;
     private WXCPUtils wxcpUtils;
+    private boolean canConnect = true;
+    private Handler handler1;
+    private Runnable runnable;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -175,6 +180,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             //	}
         }
     };
+
 
     private void startHearing() {
         robot_speak_text.setTextColor(getResources().getColor(R.color.greenText));
@@ -284,8 +290,13 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 }
                 for (int i1 = 0; i1 < staffList.size(); i1++) {
                     if (text.contains(staffList.get(i1).getName_user())) {
-                        userid = staffList.get(i1).getId();
-                        robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2);
+
+                        if (canConnect) {
+                            robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2);
+                            userid = staffList.get(i1).getId();
+                        } else {
+                            robotSpeek("前面已有联系任务，您还需等待" + time_second + "秒", 0);
+                        }
                         hasPerson = true;
                         break;
                     }
@@ -392,22 +403,11 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                             showTip("播放完成");
 //                            WeiXinUtils weiXinUtils = new WeiXinUtils(getApplicationContext());
 //                            weiXinUtils.SendText("前台有人找您，他的照片发给您");
-
-
                             wxcpUtils.sendText(file, userid, "前台有人找您，您是否同意让他进来？");
                             wxcpUtils.setOnWXCPUtilsListener(new WXCPUtils.OnWXCPUtilsListener() {
                                 @Override
                                 public void onSuccess() {
-                                    robotSpeek("已经为您通知，请等候!", 0);
-                                    intentRefreshService = new Intent();
-                                    intentRefreshService.setClass(getApplicationContext(), RefreshService.class);
-                                    intentRefreshService.putExtra("userid", userid);
-                                    startService(intentRefreshService);
-                                    listBroadCast = new RefreshListBroadCast();
-                                    IntentFilter filter = new IntentFilter();
-                                    filter.addAction(Constant.BROADCASTACTION);
-                                    registerReceiver(listBroadCast, filter);
-
+                                    successConnect();
                                 }
 
                                 @Override
@@ -419,7 +419,6 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                         } else {
                             showTip(speechError.getPlainDescription(true));
                         }
-
                     }
 
                     @Override
@@ -443,6 +442,43 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
 
             }
         }, 5000);
+    }
+
+    private void successConnect() {
+        robotSpeek("已经为您通知，请等候!", 0);
+        intentRefreshService = new Intent();
+        intentRefreshService.setClass(getApplicationContext(), RefreshService.class);
+        intentRefreshService.putExtra("userid", userid);
+        startService(intentRefreshService);
+        listBroadCast = new RefreshListBroadCast();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constant.BROADCASTACTION);
+        registerReceiver(listBroadCast, filter);
+        handler1 = new Handler();
+        time_second = 60;
+        runnable = new Runnable() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                //要做的事情
+
+                waiting_text.setVisibility(View.VISIBLE);
+                canConnect = false;
+                waiting_text.setText("正在为您联系中，剩余" + time_second-- + "秒");
+                handler1.postDelayed(this, 1000);
+            }
+        };
+        handler1.postDelayed(runnable, 1000);//每两秒执行一次runnable.
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                handler1.removeCallbacks(runnable);
+//                waiting_text.setVisibility(View.GONE);
+//                canConnect = true;
+//            }
+//        }, 60000);
+
     }
 
     /**
@@ -489,6 +525,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         setContentView(R.layout.activity_main);
         requestPermissions();
         initView();
+
         wxcpUtils = new WXCPUtils(this);
         handler.sendEmptyMessage(2);
         requestPermissions();
@@ -634,6 +671,8 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         robot_speak_text = findViewById(R.id.robot_speak_text);
         setting_main = findViewById(R.id.setting_main);
         setting_main.setOnClickListener(this);
+
+        waiting_text = findViewById(R.id.waiting_text);
 
     }
 
@@ -786,6 +825,9 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 unregisterReceiver(listBroadCast);
                 listBroadCast = null;
             }
+            handler1.removeCallbacks(runnable);
+            waiting_text.setVisibility(View.GONE);
+            canConnect = true;
             String result = intent.getStringExtra("result");
             switch (result) {
                 case "worktable":
