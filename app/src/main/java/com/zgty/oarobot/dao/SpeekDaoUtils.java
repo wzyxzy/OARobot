@@ -26,6 +26,7 @@ public class SpeekDaoUtils {
         DaoMaster daoMaster = new DaoMaster(writableDatabase);
         DaoSession daoSession = daoMaster.newSession();
         speakingDao = daoSession.getSpeakingDao();
+
     }
 
 

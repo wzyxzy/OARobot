@@ -19,6 +19,7 @@ import com.zgty.oarobot.R;
 import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.common.CommonActivity;
 import com.zgty.oarobot.dao.StaffDaoUtils;
+import com.zgty.oarobot.dao.WorkOnOffDaoUtils;
 import com.zgty.oarobot.util.ContactUtils;
 import com.zgty.oarobot.util.IdentifyFace;
 import com.zgty.oarobot.util.LogToastUtils;
@@ -220,6 +221,8 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
             staff.setId(staff_id);
             staff.setRecordFace(false);
             new StaffDaoUtils(this).insertStaff(staff);
+            WorkOnOffDaoUtils workOnOffDaoUtils = new WorkOnOffDaoUtils(this);
+            workOnOffDaoUtils.insertWork(staff_id, staff_name, id_clerk);
             firstAdd = false;
         } else {
             try {

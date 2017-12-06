@@ -526,6 +526,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         requestPermissions();
         initView();
 
+
         wxcpUtils = new WXCPUtils(this);
         handler.sendEmptyMessage(2);
         requestPermissions();

@@ -103,7 +103,16 @@
         <service
             android:name=".service.RefreshService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".receiver.DateTimeReceiver"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>
