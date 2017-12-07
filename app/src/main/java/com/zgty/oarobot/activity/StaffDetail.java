@@ -282,6 +282,8 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                             myDialog.dismiss();
                             new StaffDaoUtils(getApplicationContext()).deleteStaff(staff);
                             deleteFace(true);
+                            WorkOnOffDaoUtils workOnOffDaoUtils = new WorkOnOffDaoUtils(getApplicationContext());
+                            workOnOffDaoUtils.deleteUser(staff_id);
                         }
                     });
                     myDialog.setNoOnclickListener("取消", new MyDialog.onNoOnclickListener() {

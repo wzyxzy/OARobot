@@ -11,8 +11,7 @@ import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
 import com.zgty.oarobot.R;
 import com.zgty.oarobot.bean.AccessTokenWX;
-import com.zgty.oarobot.bean.ImageMessageBuilder;
-import com.zgty.oarobot.bean.TextMessageBuilder;
+import com.zgty.oarobot.bean.MessageBuilder;
 import com.zgty.oarobot.bean.TokenBack;
 import com.zgty.oarobot.dao.TokenDaoUtils;
 
@@ -30,6 +29,7 @@ public class WXCPUtils {
     private String token;
     private String media_id;
     private String text;
+    private String type;
     private File file;
     private String userid;
     private TokenDaoUtils tokenDaoUtils;
@@ -54,14 +54,14 @@ public class WXCPUtils {
             switch (msg.what) {
                 case 0://发送文本
                     String url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + token;
-                    TextMessageBuilder builder = new TextMessageBuilder();
+                    MessageBuilder builder = new MessageBuilder();
                     builder.setAgentid(1000002);
                     builder.setTouser(userid);
                     builder.setToparty("");
                     builder.setTotag("");
                     builder.setMsgtype("text");
                     builder.setSafe(0);
-                    TextMessageBuilder.TextBean textBean = new TextMessageBuilder.TextBean();
+                    MessageBuilder.TextBean textBean = new MessageBuilder.TextBean();
                     textBean.setContent(text);
                     builder.setText(textBean);
                     String json = new Gson().toJson(builder);
@@ -73,7 +73,7 @@ public class WXCPUtils {
                                 onWXCPUtilsListener.onError();
                                 LogToastUtils.log(TAG, "errorCode=" + tokenBack.getErrcode() + ",and errorMsg=" + tokenBack.getErrmsg());
                             } else {
-                                if (file!=null){
+                                if (!type.equalsIgnoreCase("text")) {
                                     handler.sendEmptyMessage(1);
                                 }
 
@@ -89,7 +89,7 @@ public class WXCPUtils {
                     });
                     break;
                 case 1://上传临时文件
-                    String urlPic = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + token + "&type=image";
+                    String urlPic = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + token + "&type=" + type;
                     OkGo.<String>post(urlPic)
                             .params("media", file)
                             .execute(new StringCallback() {
@@ -116,18 +116,27 @@ public class WXCPUtils {
                     break;
                 case 2://发送图片信息
                     String urlImg = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + token;
-                    ImageMessageBuilder imageMessageBuilder = new ImageMessageBuilder();
-                    imageMessageBuilder.setAgentid(1000002);
-                    imageMessageBuilder.setTouser(userid);
-                    imageMessageBuilder.setToparty("");
-                    imageMessageBuilder.setTotag("");
-                    imageMessageBuilder.setMsgtype("image");
-                    imageMessageBuilder.setSafe(0);
-                    ImageMessageBuilder.ImageBean imageBean = new ImageMessageBuilder.ImageBean();
-                    imageBean.setMedia_id(media_id);
-                    imageMessageBuilder.setImage(imageBean);
-                    String jsonImg = new Gson().toJson(imageMessageBuilder);
-                    OkGo.<String>post(urlImg).upJson(jsonImg).execute(new StringCallback() {
+                    MessageBuilder messageBuilder = new MessageBuilder();
+                    messageBuilder.setAgentid(1000002);
+                    messageBuilder.setTouser(userid);
+                    messageBuilder.setToparty("");
+                    messageBuilder.setTotag("");
+                    messageBuilder.setMsgtype(type);
+                    messageBuilder.setSafe(0);
+                    switch (type) {
+                        case "image":
+                            MessageBuilder.ImageBean imageBean = new MessageBuilder.ImageBean();
+                            imageBean.setMedia_id(media_id);
+                            messageBuilder.setImage(imageBean);
+                            break;
+                        case "file":
+                            MessageBuilder.FileBean fileBean = new MessageBuilder.FileBean();
+                            fileBean.setMedia_id(media_id);
+                            messageBuilder.setFile(fileBean);
+                            break;
+                    }
+                    String jsonMsg = new Gson().toJson(messageBuilder);
+                    OkGo.<String>post(urlImg).upJson(jsonMsg).execute(new StringCallback() {
                         @Override
                         public void onSuccess(Response<String> response) {
                             TokenBack tokenBack = new Gson().fromJson(response.body(), TokenBack.class);
@@ -136,7 +145,6 @@ public class WXCPUtils {
                                 LogToastUtils.log(TAG, "errorCode=" + tokenBack.getErrcode() + ",and errorMsg=" + tokenBack.getErrmsg());
                             } else {
                                 onWXCPUtilsListener.onSuccess();
-
                             }
                         }
 
@@ -153,10 +161,12 @@ public class WXCPUtils {
         }
     };
 
-    public void sendText(File file, String userid, String text) {
+
+    public void sendText(File file, String userid, String text, String type) {
         this.file = file;
         this.userid = userid;
         this.text = text;
+        this.type = type;
         getToken();
         handmessge = 0;
     }

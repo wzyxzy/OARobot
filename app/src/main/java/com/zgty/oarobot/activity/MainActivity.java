@@ -2,6 +2,8 @@ package com.zgty.oarobot.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +38,8 @@ import com.zgty.oarobot.dao.AccountDaoUtils;
 import com.zgty.oarobot.dao.SpeekDaoUtils;
 import com.zgty.oarobot.dao.StaffDaoUtils;
 import com.zgty.oarobot.dao.TimeDaoUtils;
+import com.zgty.oarobot.dao.WorkOnOffDaoUtils;
+import com.zgty.oarobot.receiver.DateTimeReceiver;
 import com.zgty.oarobot.service.RefreshService;
 import com.zgty.oarobot.util.FileUtils;
 import com.zgty.oarobot.util.IdentifyFace;
@@ -46,6 +50,7 @@ import com.zgty.oarobot.util.WXCPUtils;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -403,7 +408,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                             showTip("播放完成");
 //                            WeiXinUtils weiXinUtils = new WeiXinUtils(getApplicationContext());
 //                            weiXinUtils.SendText("前台有人找您，他的照片发给您");
-                            wxcpUtils.sendText(file, userid, "前台有人找您，您是否同意让他进来？");
+                            wxcpUtils.sendText(file, userid, "前台有人找您，您是否同意让他进来？", "image");
                             wxcpUtils.setOnWXCPUtilsListener(new WXCPUtils.OnWXCPUtilsListener() {
                                 @Override
                                 public void onSuccess() {
@@ -525,11 +530,29 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         setContentView(R.layout.activity_main);
         requestPermissions();
         initView();
-
+        initAlarm();
 
         wxcpUtils = new WXCPUtils(this);
         handler.sendEmptyMessage(2);
         requestPermissions();
+    }
+
+    /**
+     * 闹钟事件，每月1号生成一个cvs
+     */
+    private void initAlarm() {
+        final int INTERVAL = 1000 * 60 * 60 * 24;//每天检查一次
+        Intent intent = new Intent(this, DateTimeReceiver.class);
+        PendingIntent sender = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 7);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        assert alarmManager != null;
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), INTERVAL, sender);
+
     }
 
 
@@ -695,6 +718,12 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             sign_up_time.setText(nowtime);
             String type = getType(staff);
             station_state.setText(type);
+            WorkOnOffDaoUtils workOnOffDaoUtils = new WorkOnOffDaoUtils(this);
+            if (timenow <= 12) {
+                workOnOffDaoUtils.updateWorkOn(staff.getId(), nowtime);
+            } else {
+                workOnOffDaoUtils.updateWorkOff(staff.getId(), nowtime);
+            }
 //            if (!type.equalsIgnoreCase("中途外出")) {
 //                wxcpUtils.sendText(null, userid, "姓名：" + staff.getName_user() + "\n工号：" + staff.getId_clerk() + "\n部门：" + staff.getName_part() + "\n打卡时间：" + nowtime + "\n打卡类型：" + type);
 //            }
@@ -717,6 +746,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     //获取打卡类型
     private String getType(Staff staff) {
         String type = "";
+
         if (timenow >= timeadd) {
             type = "加班";
             robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeAddNormal"), staff.getName_user()), 0);
@@ -833,31 +863,31 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             switch (result) {
                 case "worktable":
                     robotSpeek("对方已经接受了您的请求，请您直接去他的工位或办公室!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！","text");
                     break;
                 case "combig":
                     robotSpeek("对方已经接受了您的请求，请您到大会议室等候!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！","text");
                     break;
                 case "comsmall":
                     robotSpeek("对方已经接受了您的请求，请您到小会议室等候!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！","text");
                     break;
                 case "talk1":
                     robotSpeek("对方已经接受了您的请求，请您到洽谈室1等候!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！","text");
                     break;
                 case "talk2":
                     robotSpeek("对方已经接受了您的请求，请您到洽谈室2等候!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！");
+                    wxcpUtils.sendText(null, userid, "已经让对方通过！","text");
                     break;
                 case "reject":
                     robotSpeek("对方已经拒绝了您的请求，请您自行联系!", 0);
-                    wxcpUtils.sendText(null, userid, "已经拒绝对方！");
+                    wxcpUtils.sendText(null, userid, "已经拒绝对方！","text");
                     break;
                 case "timeout":
                     robotSpeek("超过一分钟没有答复，请您自行联系!", 0);
-                    wxcpUtils.sendText(null, userid, "您超过一分钟没有回复，该信息已经失效！");
+                    wxcpUtils.sendText(null, userid, "您超过一分钟没有回复，该信息已经失效！","text");
                     break;
             }
 

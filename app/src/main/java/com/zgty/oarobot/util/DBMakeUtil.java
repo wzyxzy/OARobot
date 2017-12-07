@@ -15,14 +15,17 @@ import java.io.IOException;
  */
 
 public class DBMakeUtil {
-    public static void ExportToCSV(Cursor c, String fileName) {
+    public static File ExportToCSV(Cursor c, String fileName) {
 
         int rowCount = 0;
         int colCount = 0;
         FileWriter fw;
         BufferedWriter bfw;
         File sdCardDir = Environment.getExternalStorageDirectory();
-        File saveFile = new File(sdCardDir + "/oa_robot/cvs", fileName);
+        File saveFile = new File(sdCardDir + "/oa_robot", fileName);
+        if (saveFile.getParentFile()==null){
+            saveFile.getParentFile().mkdirs();// 创建文件夹
+        }
         try {
 
             rowCount = c.getCount();
@@ -62,9 +65,11 @@ public class DBMakeUtil {
             bfw.close();
             // Toast.makeText(mContext, "导出完毕！", Toast.LENGTH_SHORT).show();
             Log.v("导出数据", "导出完毕！");
+            return saveFile;
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return null;
         } finally {
             c.close();
         }

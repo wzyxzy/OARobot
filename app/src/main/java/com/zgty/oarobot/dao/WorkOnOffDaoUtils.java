@@ -4,10 +4,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.zgty.oarobot.bean.DaoMaster;
 import com.zgty.oarobot.bean.DaoSession;
-import com.zgty.oarobot.bean.StaffDao;
 import com.zgty.oarobot.bean.WorkOnOff;
 import com.zgty.oarobot.bean.WorkOnOffDao;
 
@@ -131,7 +131,7 @@ public class WorkOnOffDaoUtils {
      */
     public void deleteUser(String userId) {
         QueryBuilder<WorkOnOff> qb = workOnOffDao.queryBuilder();
-        DeleteQuery<WorkOnOff> bd = qb.where(StaffDao.Properties.Id.eq(userId)).buildDelete();
+        DeleteQuery<WorkOnOff> bd = qb.where(WorkOnOffDao.Properties.Id.eq(userId)).buildDelete();
         bd.executeDeleteWithoutDetachingEntities();
     }
 
@@ -142,7 +142,7 @@ public class WorkOnOffDaoUtils {
      */
     public void updateWorkOn(String userid, String time) {
         QueryBuilder<WorkOnOff> qb = workOnOffDao.queryBuilder();
-        WorkOnOff workOnOff = qb.where(StaffDao.Properties.Id.eq(userid)).list().get(0);
+        WorkOnOff workOnOff = qb.where(WorkOnOffDao.Properties.Id.eq(userid)).list().get(0);
         Calendar c = Calendar.getInstance();
         int day = c.get(Calendar.DAY_OF_MONTH);
         switch (day) {
@@ -283,7 +283,10 @@ public class WorkOnOffDaoUtils {
      */
     public void updateWorkOff(String userid, String time) {
         QueryBuilder<WorkOnOff> qb = workOnOffDao.queryBuilder();
-        WorkOnOff workOnOff = qb.where(StaffDao.Properties.Id.eq(userid)).list().get(0);
+        Log.d("id1",WorkOnOffDao.Properties.Id.toString());
+        Log.d("id2",userid);
+
+        WorkOnOff workOnOff = qb.where(WorkOnOffDao.Properties.Id.eq(userid)).list().get(0);
         Calendar c = Calendar.getInstance();
         int day = c.get(Calendar.DAY_OF_MONTH);
         switch (day) {

@@ -6,9 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.zgty.oarobot.R;
-import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.common.CommonActivity;
-import com.zgty.oarobot.dao.StaffDaoUtils;
 
 import static com.zgty.oarobot.common.Constant.nowAccount;
 
@@ -89,20 +87,5 @@ public class AdminActivity extends CommonActivity implements View.OnClickListene
         nowAccount = null;
     }
 
-    private void insertStaff() {
-        StaffDaoUtils staffDaoUtils = new StaffDaoUtils(this);
-        for (int i = 0; i < 50; i++) {
-            Staff staff = new Staff();
-            staff.setId(String.valueOf(10000 + i));
-            staff.setName_user("张XX" + i);
-            staff.setId_user("zhangxx" + i);
-            staff.setId_clerk(String.valueOf(i + 1));
-            staff.setName_part("技术研发部");
-            staff.setName_position("安卓工程师");
-            staff.setCall_num(String.valueOf(18010480090L + i));
-            staff.setUser_type("会议室");
-            staff.setRecordFace(false);
-            staffDaoUtils.insertStaff(staff);
-        }
-    }
+
 }

@@ -39,13 +39,7 @@ public class StaffManager extends CommonActivity implements View.OnClickListener
 
     private void initData() {
         StaffDaoUtils staffDaoUtils = new StaffDaoUtils(this);
-//        DBMakeUtil.ExportToCSV(staffDaoUtils.queryAll(), "test.csv");
-//        WorkOnOffDaoUtils workOnOffDaoUtils=new WorkOnOffDaoUtils(this);
-
         staffList = staffDaoUtils.queryStaffList();
-//        for (int i = 0; i < staffList.size(); i++) {
-//            workOnOffDaoUtils.insertWork(staffList.get(i).getId(),staffList.get(i).getName_user(),staffList.get(i).getId_clerk());
-//        }
         if (staffList != null && staffList.size() > 0) {
             staffChooseAdapter.updateRes(staffList);
         } else {
