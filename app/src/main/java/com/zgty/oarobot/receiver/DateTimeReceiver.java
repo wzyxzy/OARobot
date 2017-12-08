@@ -25,7 +25,7 @@ public class DateTimeReceiver extends BroadcastReceiver {
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
         if (day == 1) {
-            File file = DBMakeUtil.ExportToCSV(workOnOffDaoUtils.queryAll(), (month + 1) + "月考勤导出表.csv");
+            File file = DBMakeUtil.ExportToCSV(workOnOffDaoUtils.queryAll(), month + "月考勤导出表.csv");
             WXCPUtils wxcpUtils = new WXCPUtils(context);
             wxcpUtils.sendText(file, "wuzhiying16", "上个月的考勤导出表发给您，请您用excel导入", "file");
             wxcpUtils.setOnWXCPUtilsListener(new WXCPUtils.OnWXCPUtilsListener() {

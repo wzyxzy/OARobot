@@ -95,6 +95,12 @@ public class LoginActivity extends CommonActivity implements View.OnClickListene
 
     private void submit() {
         // validate
+//        List<Staff> staffList = new StaffDaoUtils(this).queryStaffList();
+//        for (int i = 0; i < staffList.size(); i++) {
+//            WorkOnOffDaoUtils workOnOffDaoUtils = new WorkOnOffDaoUtils(this);
+//            workOnOffDaoUtils.insertWork(staffList.get(i).getId(), staffList.get(i).getName_user(), staffList.get(i).getId_clerk());
+//        }
+
         String account = login_account.getText().toString().trim();
         String password = login_password.getText().toString().trim();
         String again = input_new_pass_again.getText().toString().trim();
@@ -138,10 +144,10 @@ public class LoginActivity extends CommonActivity implements View.OnClickListene
                         startActivity(intent);
                         finish();
                     } else {
-                        LogToastUtils.toastShort(this, "密码错误!");
+                        LogToastUtils.toastShort(this, "账户或密码错误!");
                     }
                 } catch (IndexOutOfBoundsException e) {
-                    LogToastUtils.toastShort(this, "账号不存在!");
+                    LogToastUtils.toastShort(this, "账号或密码错误!");
 
                 }
                 break;

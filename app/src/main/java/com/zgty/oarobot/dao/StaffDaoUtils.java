@@ -1,7 +1,6 @@
 package com.zgty.oarobot.dao;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.zgty.oarobot.bean.DaoMaster;
@@ -99,9 +98,5 @@ public class StaffDaoUtils {
         return qb.list();
     }
 
-    public Cursor queryAll(){
 
-        Cursor query = staffDao.queryBuilder().buildCursor().forCurrentThread().query();
-        return query;
-    }
 }
