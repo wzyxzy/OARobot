@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import okhttp3.OkHttpClient;
 
 import static com.zgty.oarobot.common.Constant.pSpeeker_xiaoqi;
+import static com.zgty.oarobot.common.Constant.pSpeeker_xiaoyan;
 
 /**
  * Created by zy on 2017/10/31.
@@ -41,7 +42,7 @@ public class OARobotApplication extends Application {
     public static SpeechSynthesizer mTts;
 
     // 默认云端发音人
-    public static String voicerCloud = pSpeeker_xiaoqi;
+    public static String voicerCloud = pSpeeker_xiaoyan;
     // 默认本地发音人
     public static String voicerLocal = pSpeeker_xiaoqi;
     //缓冲进度

@@ -72,9 +72,10 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private TextView name_part;
     private TextView robot_speak_text;
     private TextView setting_main;
-    private IdentifyFace identifyFace;
-    private String userid = "00000";
+    private IdentifyFace identifyFace;  //识别工具，待分离
+    private String userid;//用户ID
 
+    //时间
     private double timeon;
     private double timeonlate;
     private double timeoffearly;
@@ -82,7 +83,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private double timeadd;
     private double timenow;
     // 语音听写对象
-    private SpeechRecognizer mIat;
+    private SpeechRecognizer mIat;//待归类
     private int noanswer = 0;
     private int time_second;
 
@@ -96,7 +97,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private boolean canConnect = true;
     private Handler handler1;
     private Runnable runnable;
-
+    //全部机器人说的话都写到异步中
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
@@ -128,7 +129,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
 
 
     /**
-     * 合成回调监听。
+     * 合成回调监听。播放完成后进行聆听，适用于请问您找谁？
      */
     private SynthesizerListener mTtsListener = new SynthesizerListener() {
 
@@ -356,7 +357,10 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                     public void onCompleted(SpeechError speechError) {
                         if (speechError == null) {
                             showTip("播放完成");
+//                            identifyFace.openSurfaceView();
                             identifyFace.startCameraView();
+
+//                            identifyFace.openSurfaceView();
 
                         } else if (speechError != null) {
                             showTip(speechError.getPlainDescription(true));
@@ -563,7 +567,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         initTime();
         initAcoount();
         if (identifyFace == null) {
-            identifyFace = new IdentifyFace(camera_preview, this, MAIN_CHECK_CAMERA_TYPE);
+            identifyFace = new IdentifyFace(camera_preview, this, MAIN_CHECK_CAMERA_TYPE,this);
             identifyFace.openSurfaceView();
         }
         identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {

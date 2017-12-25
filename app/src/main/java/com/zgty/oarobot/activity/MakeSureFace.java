@@ -83,7 +83,7 @@ public class MakeSureFace extends CommonSActivity implements View.OnClickListene
     protected void onResume() {
         super.onResume();
         if (identifyFace == null) {
-            identifyFace = new IdentifyFace(camera_preview, this, MAIN_RECORD_CAMERA_TYPE);
+            identifyFace = new IdentifyFace(camera_preview, this, MAIN_RECORD_CAMERA_TYPE,this);
             identifyFace.openSurfaceView();
         }
         identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {

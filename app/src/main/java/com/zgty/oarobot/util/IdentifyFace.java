@@ -1,5 +1,6 @@
 package com.zgty.oarobot.util;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,7 +9,9 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -36,7 +39,7 @@ import static com.zgty.oarobot.common.Constant.pScoreDivider;
 
 public class IdentifyFace {
     private static final String TAG = IdentifyFace.class.getSimpleName();
-    private DrawFacesView facesView;
+//    private DrawFacesView facesView;
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private SurfaceView mPreview;
@@ -47,6 +50,7 @@ public class IdentifyFace {
     private OnIdentifyListener onIdentifyListener;
     private byte[] data;
     private int type;
+    private boolean safeToTakePicture = false;
 
     public IdentifyFace(Context context) {
         this.context = context;
@@ -80,13 +84,20 @@ public class IdentifyFace {
      * @param context        上下文
      * @param type           识别/录入 类型
      */
-    public IdentifyFace(FrameLayout camera_preview, final Context context, int type) {
+    public IdentifyFace(FrameLayout camera_preview, final Context context, int type, Activity activity) {
         this.context = context;
         mPreview = new SurfaceView(context);
-        facesView = new DrawFacesView(context);
+//        facesView = new DrawFacesView(context);
         this.type = type;
         camera_preview.addView(mPreview);
-        camera_preview.addView(facesView);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            facesView = new DrawFacesView(context);
+//            camera_preview.addView(facesView);
+//        }
+//        camera_preview.addView(facesView);
+
+//        activity.addContentView(mPreview,camera_preview.getLayoutParams());
+//        activity.addContentView(facesView,null);
         mProDialog = new ProgressDialog(context);
         mProDialog.setCancelable(true);
         mProDialog.setTitle("请稍候");
@@ -128,8 +139,10 @@ public class IdentifyFace {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 if (mCamera == null) {
-                    mCamera = Camera.open(1);
+                    mCamera = Camera.open(Camera.getNumberOfCameras() == 1 ? 0 : 1);
                     try {
+
+                        safeToTakePicture = true;
                         mCamera.setFaceDetectionListener(new FaceDetectorListener());
                         mCamera.setPreviewDisplay(holder);
                         startFaceDetection();
@@ -160,9 +173,8 @@ public class IdentifyFace {
                     int measuredWidth = mPreview.getWidth();
                     int measuredHeight = mPreview.getHeight();
                     setCameraParms(mCamera, measuredWidth, measuredHeight);
-                    mCamera.startPreview();
+                    startCameraView();
 
-                    startFaceDetection(); // re-start face detection feature
 
                 } catch (Exception e) {
                     // ignore: tried to stop a non-existent preview
@@ -172,7 +184,7 @@ public class IdentifyFace {
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                if (mCamera!=null){
+                if (mCamera != null) {
                     mCamera.stopPreview();
                     mCamera.release();
                     mCamera = null;
@@ -224,8 +236,12 @@ public class IdentifyFace {
     }
 
     public void startCameraView() {
-        if (mCamera != null)
+        if (mCamera != null) {
             mCamera.startPreview();
+            startFaceDetection();
+            safeToTakePicture = true;
+
+        }
     }
 
     public void startFaceDetection() {
@@ -247,6 +263,7 @@ public class IdentifyFace {
         @Override
         public void onFaceDetection(Camera.Face[] faces, Camera camera) {
             if (faces.length > 0) {
+
                 Camera.Face face = faces[0];
                 Rect rect = face.rect;
                 Log.d("FaceDetection", "可信度：" + face.score + "face detected: " + faces.length +
@@ -254,22 +271,35 @@ public class IdentifyFace {
                         "Y: " + rect.centerY() + "   " + rect.left + " " + rect.top + " " + rect.right + " " + rect.bottom);
                 Log.e("tag", "【FaceDetectorListener】类的方法：【onFaceDetection】: ");
                 Matrix matrix = updateFaceRect();
-                facesView.updateFaces(matrix, faces);
+//                if (facesView != null)
+//                    facesView.updateFaces(matrix, faces);
                 //拍照，并上传到讯飞
 
-                try {
-                    camera.takePicture(null, null, jpegCallback);
-                    camera.stopPreview();
-
-                } catch (Exception e) {
-                    // ignore: tried to stop a non-existent preview
-                    Log.e(TAG, "Error stopping camera preview: " + e.getMessage());
+                if (safeToTakePicture) {
+                    mCamera.takePicture(null, null, jpegCallback);
+                    safeToTakePicture = false;
+//                    camera.stopPreview();
                 }
-            } else {
-                // 只会执行一次
-                Log.e("tag", "【FaceDetectorListener】类的方法：【onFaceDetection】: " + "没有脸部");
-                facesView.removeRect();
-            }
+//                try {
+//
+//                    camera.stopPreview();
+//
+//                } catch (Exception e) {
+//                    // ignore: tried to stop a non-existent preview
+//                    Log.e(TAG, "Error stopping camera preview: " + e.getMessage());
+                }
+//            } else {
+////                // 只会执行一次
+////                new Handler().postDelayed(new Runnable() {
+////                    @Override
+////                    public void run() {
+////                        Log.e("tag", "【FaceDetectorListener】类的方法：【onFaceDetection】: " + "没有脸部");
+////                    }
+////                }, 1000);
+////
+////                if (facesView != null)
+////                    facesView.removeRect();
+//            }
         }
     }
 
@@ -382,7 +412,7 @@ public class IdentifyFace {
             @Override
             public void onError(SpeechError error) {
                 LogToastUtils.log(TAG, error.getPlainDescription(true));
-                if (error.getErrorCode()==10142){
+                if (error.getErrorCode() == 10142) {
                     deleteStaff(id_staff);
                 }
             }
@@ -452,7 +482,7 @@ public class IdentifyFace {
         @Override
         public void onError(SpeechError error) {
             LogToastUtils.log(TAG, error.getPlainDescription(true));
-            if (error.getErrorCode()==11700){
+            if (error.getErrorCode() == 11700) {
                 onIdentifyListener.onError();
             }
         }
@@ -466,6 +496,10 @@ public class IdentifyFace {
         public void onPictureTaken(byte[] data, Camera camera) {
             if (null != data) {
                 setData(data);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    camera.stopPreview();
+                }
+
                 if (MAIN_CHECK_CAMERA_TYPE == type) {
 
                     // 清空参数
@@ -485,7 +519,6 @@ public class IdentifyFace {
                     // 写入完毕
                     mIdVerifier.stopWrite("ifr");
                 } else {
-
 
 
                     onIdentifyListener.onCapture();
@@ -531,8 +564,7 @@ public class IdentifyFace {
 //                }, 15000);
             } else {
 //                mTts.startSpeaking("没有检测到人脸", null);
-                if (mCamera != null)
-                    mCamera.startPreview();
+                startCameraView();
 
             }
 
@@ -593,8 +625,7 @@ public class IdentifyFace {
         } else {
             LogToastUtils.log(TAG, "识别失败！");
             onIdentifyListener.onError();
-            if (mCamera != null)
-                mCamera.startPreview();
+            startCameraView();
         }
 
     }

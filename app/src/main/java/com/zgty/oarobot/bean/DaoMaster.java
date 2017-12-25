@@ -21,21 +21,21 @@ public class DaoMaster extends AbstractDaoMaster {
 
     /** Creates underlying database table using DAOs. */
     public static void createAllTables(Database db, boolean ifNotExists) {
-        StaffDao.createTable(db, ifNotExists);
-        TimeDao.createTable(db, ifNotExists);
+        AccessTokenWXDao.createTable(db, ifNotExists);
         AccountDao.createTable(db, ifNotExists);
         SpeakingDao.createTable(db, ifNotExists);
-        AccessTokenWXDao.createTable(db, ifNotExists);
+        StaffDao.createTable(db, ifNotExists);
+        TimeDao.createTable(db, ifNotExists);
         WorkOnOffDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
     public static void dropAllTables(Database db, boolean ifExists) {
-        StaffDao.dropTable(db, ifExists);
-        TimeDao.dropTable(db, ifExists);
+        AccessTokenWXDao.dropTable(db, ifExists);
         AccountDao.dropTable(db, ifExists);
         SpeakingDao.dropTable(db, ifExists);
-        AccessTokenWXDao.dropTable(db, ifExists);
+        StaffDao.dropTable(db, ifExists);
+        TimeDao.dropTable(db, ifExists);
         WorkOnOffDao.dropTable(db, ifExists);
     }
 
@@ -55,11 +55,11 @@ public class DaoMaster extends AbstractDaoMaster {
 
     public DaoMaster(Database db) {
         super(db, SCHEMA_VERSION);
-        registerDaoClass(StaffDao.class);
-        registerDaoClass(TimeDao.class);
+        registerDaoClass(AccessTokenWXDao.class);
         registerDaoClass(AccountDao.class);
         registerDaoClass(SpeakingDao.class);
-        registerDaoClass(AccessTokenWXDao.class);
+        registerDaoClass(StaffDao.class);
+        registerDaoClass(TimeDao.class);
         registerDaoClass(WorkOnOffDao.class);
     }
 
