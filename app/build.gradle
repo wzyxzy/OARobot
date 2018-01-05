@@ -38,4 +38,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.2'
     compile 'com.lzy.net:okgo:3.0.4'
     compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
+    compile 'com.android.support:support-v4:26.1.0'
+    compile 'com.android.support:design:26.1.0'
+    compile 'com.google.android.gms:play-services-vision:9.4.0+'
 }

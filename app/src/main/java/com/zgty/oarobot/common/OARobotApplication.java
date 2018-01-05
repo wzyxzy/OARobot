@@ -44,7 +44,7 @@ public class OARobotApplication extends Application {
     // 默认云端发音人
     public static String voicerCloud = pSpeeker_xiaoyan;
     // 默认本地发音人
-    public static String voicerLocal = pSpeeker_xiaoqi;
+    public static String voicerLocal = pSpeeker_xiaoyan;
     //缓冲进度
     private int mPercentForBuffering = 0;
     //播放进度
@@ -62,6 +62,7 @@ public class OARobotApplication extends Application {
         initOKGo();
         initTTS();
         instance = this;
+
         mTts.startSpeaking("欢迎使用中广通业考勤系统", null);
 
 

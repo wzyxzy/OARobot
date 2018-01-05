@@ -82,6 +82,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
+        <item name="android:textSize">@dimen/edit_text_size</item>
         <item name="android:textColor">@color/whiteText</item>
     </style>
 
@@ -151,5 +152,11 @@
         <item name="android:windowContentOverlay">@null</item> <!--对话框是否有遮盖，这个不设置的话，可能会出现边框黑线-->
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item> <!--动画-->
         <item name="android:backgroundDimEnabled">true</item> <!-- 背景是否模糊显示-->
+    </style>
+
+    <style name="roomRatingBar" parent="@android:style/Widget.RatingBar">
+        <item name="android:progressDrawable">@drawable/ratingbar_full</item>
+        <item name="android:minHeight">24dip</item>
+        <item name="android:maxHeight">60dip</item>
     </style>
 </resources>

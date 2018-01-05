@@ -3,6 +3,7 @@ package com.zgty.oarobot.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,9 +18,17 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.vision.CameraSource;
+import com.google.android.gms.vision.Detector;
+import com.google.android.gms.vision.MultiProcessor;
+import com.google.android.gms.vision.Tracker;
+import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.FaceDetector;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerListener;
@@ -32,6 +41,8 @@ import com.zgty.oarobot.bean.Account;
 import com.zgty.oarobot.bean.Speaking;
 import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.bean.Time;
+import com.zgty.oarobot.camera.CameraSourcePreview;
+import com.zgty.oarobot.camera.GraphicOverlay;
 import com.zgty.oarobot.common.CommonActivity;
 import com.zgty.oarobot.common.Constant;
 import com.zgty.oarobot.dao.AccountDaoUtils;
@@ -43,11 +54,13 @@ import com.zgty.oarobot.receiver.DateTimeReceiver;
 import com.zgty.oarobot.service.RefreshService;
 import com.zgty.oarobot.util.FileUtils;
 import com.zgty.oarobot.util.IdentifyFace;
+import com.zgty.oarobot.util.IdentifyFace2;
 import com.zgty.oarobot.util.JsonParser;
 import com.zgty.oarobot.util.LogToastUtils;
 import com.zgty.oarobot.util.WXCPUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,21 +71,21 @@ import java.util.Locale;
 import static com.zgty.oarobot.common.Constant.MAIN_CHECK_CAMERA_TYPE;
 import static com.zgty.oarobot.common.OARobotApplication.mTts;
 
-public class MainActivity extends CommonActivity implements View.OnClickListener {
+public class MainActivityN extends CommonActivity implements View.OnClickListener {
 
     private TextView change_mode;
     private TextView name_staff;
     private TextView id_staff;
     private TextView sign_up_time;
     private TextView station_state;
-    private FrameLayout camera_preview;
     private TextView waiting_text;
 
     private TextView name_part;
     private TextView robot_speak_text;
     private TextView setting_main;
-    private IdentifyFace identifyFace;  //识别工具，待分离
+    private IdentifyFace2 identifyFace;  //识别工具，待分离
     private String userid;//用户ID
+    private String userid1;//用户ID,用来联系
     private String username;//用户name
 
     //时间
@@ -87,7 +100,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private int noanswer = 0;
     private int time_second;
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = MainActivityN.class.getSimpleName();
 
     private SpeekDaoUtils speekDaoUtils;
     private File file;
@@ -97,6 +110,17 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     private boolean canConnect = true;
     private Handler handler1;
     private Runnable runnable;
+
+
+    private CameraSource mCameraSource = null;
+
+    private CameraSourcePreview mPreview;
+    private GraphicOverlay mGraphicOverlay;
+    private RatingBar rb_normal;
+
+    private static final int RC_HANDLE_GMS = 9001;
+    // permission request codes need to be < 256
+    private static final int RC_HANDLE_CAMERA_PERM = 2;
     //全部机器人说的话都写到异步中
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -283,7 +307,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
 
                         if (canConnect) {
                             robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2);
-                            userid = staffList.get(i1).getId();
+                            userid1 = staffList.get(i1).getId();
                         } else {
                             robotSpeek("前面已有联系任务，您还需等待" + time_second + "秒", 0);
                         }
@@ -300,7 +324,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 if (noanswer < 3) {
                     robotSpeek(speekDaoUtils.querySpeekingText("cannotHearingClear"), 1);
                 } else {
-                    identifyFace.startCameraView();
+//                    identifyFace.startCameraView();
                 }
 
                 break;
@@ -342,7 +366,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                         if (speechError == null) {
                             showTip("播放完成");
 //                            identifyFace.openSurfaceView();
-                            identifyFace.startCameraView();
+//                            identifyFace.startCameraView();
 
 //                            identifyFace.openSurfaceView();
 
@@ -396,7 +420,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                             showTip("播放完成");
 //                            WeiXinUtils weiXinUtils = new WeiXinUtils(getApplicationContext());
 //                            weiXinUtils.SendText("前台有人找您，他的照片发给您");
-                            wxcpUtils.sendText(file, userid, "前台有人找您，您是否同意让他进来？", "image");
+                            wxcpUtils.sendText(file, userid1, "前台有人找您，您是否同意让他进来？", "image");
                             wxcpUtils.setOnWXCPUtilsListener(new WXCPUtils.OnWXCPUtilsListener() {
                                 @Override
                                 public void onSuccess() {
@@ -455,7 +479,8 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                             showTip("播放完成");
 //                            WeiXinUtils weiXinUtils = new WeiXinUtils(getApplicationContext());
 //                            weiXinUtils.SendText("前台有人找您，他的照片发给您");
-                            wxcpUtils.sendText(null, "wuzhiying16", "离职人员" + username + "，正在前台等候，是否同意让他进来？", "text_out");
+                            userid1 = "wuzhiying16";
+                            wxcpUtils.sendText(null, userid1, "离职人员" + username + "，正在前台等候，是否同意让他进来？", "text_out");
                             wxcpUtils.setOnWXCPUtilsListener(new WXCPUtils.OnWXCPUtilsListener() {
                                 @Override
                                 public void onSuccess() {
@@ -495,7 +520,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         robotSpeek("已经为您通知，请等候!", 0);
         intentRefreshService = new Intent();
         intentRefreshService.setClass(getApplicationContext(), RefreshService.class);
-        intentRefreshService.putExtra("userid", userid);
+        intentRefreshService.putExtra("userid", userid1);
         startService(intentRefreshService);
         listBroadCast = new RefreshListBroadCast();
         IntentFilter filter = new IntentFilter();
@@ -569,12 +594,46 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        requestPermissions();
+        setContentView(R.layout.activity_main_n);
         initView();
+        createCameraSource();
+        requestPermissions();
+
         initAlarm();
         handler.sendEmptyMessage(2);
         wxcpUtils = new WXCPUtils(this);
+    }
+
+
+    private void createCameraSource() {
+
+        Context context = getApplicationContext();
+        FaceDetector detector = new FaceDetector.Builder(context)
+                .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                .setProminentFaceOnly(true)
+                .build();
+
+        detector.setProcessor(
+                new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
+                        .build());
+
+        if (!detector.isOperational()) {
+            // Note: The first time that an app using face API is installed on a device, GMS will
+            // download a native library to the device in order to do detection.  Usually this
+            // completes before the app is run for the first time.  But if that download has not yet
+            // completed, then the above call will not detect any faces.
+            //
+            // isOperational() can be used to check if the required native library is currently
+            // available.  The detector will automatically become operational once the library
+            // download completes on device.
+            Log.w(TAG, "Face detector dependencies are not yet available.");
+        }
+
+        mCameraSource = new CameraSource.Builder(context, detector)
+                .setRequestedPreviewSize(640, 480)
+                .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setRequestedFps(30.0f)
+                .build();
     }
 
     /**
@@ -602,42 +661,99 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         initInfo();
         initTime();
         initAcoount();
+        startCameraSource();
+
         if (identifyFace == null) {
-            identifyFace = new IdentifyFace(camera_preview, this, MAIN_CHECK_CAMERA_TYPE, this);
-            identifyFace.openSurfaceView();
+            identifyFace = new IdentifyFace2(this, MAIN_CHECK_CAMERA_TYPE);
+            identifyFace.setOnIdentifyListener(new IdentifyFace2.OnIdentifyListener() {
+                @Override
+                public void onSuccess(String user_id) {
+                    userid = user_id;
+                    handler.sendEmptyMessage(0);
+                }
+
+                @Override
+                public void onSwitch(byte[] b) {
+                    file = FileUtils.getFileFromBytes(b);
+                    handler.sendEmptyMessage(1);
+                }
+
+                @Override
+                public void onError() {
+
+                }
+
+                @Override
+                public void onCapture() {
+
+                }
+
+                @Override
+                public void onRegisterSuccess() {
+
+                }
+            });
         }
-        identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {
-            @Override
-            public void onSuccess(String user_id) {
-                LogToastUtils.log(TAG, "success");
-                handler.sendEmptyMessage(0);
-                userid = user_id;
-//                onResume();
+
+//        if (identifyFace == null) {
+//            identifyFace = new IdentifyFace(camera_preview, this, MAIN_CHECK_CAMERA_TYPE, this);
+//            identifyFace.openSurfaceView();
+//        }
+//        identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {
+//            @Override
+//            public void onSuccess(String user_id) {
+//                LogToastUtils.log(TAG, "success");
+//                handler.sendEmptyMessage(0);
+//                userid = user_id;
+////                onResume();
+//            }
+//
+//            @Override
+//            public void onSwitch(byte[] data) {
+//                file = FileUtils.getFileFromBytes(data);
+//                LogToastUtils.log(TAG, "switch");
+//                handler.sendEmptyMessage(1);
+//            }
+//
+//            @Override
+//            public void onError() {
+//                LogToastUtils.log(TAG, "error");
+//            }
+//
+//            @Override
+//            public void onCapture() {
+//
+//            }
+//
+//            @Override
+//            public void onRegisterSuccess() {
+//
+//            }
+//        });
+
+    }
+
+
+    private void startCameraSource() {
+
+        // check that the device has play services available.
+        int code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
+                getApplicationContext());
+        if (code != ConnectionResult.SUCCESS) {
+            Dialog dlg =
+                    GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS);
+            dlg.show();
+        }
+
+        if (mCameraSource != null) {
+            try {
+                mPreview.start(mCameraSource, mGraphicOverlay);
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to start camera source.", e);
+                mCameraSource.release();
+                mCameraSource = null;
             }
-
-            @Override
-            public void onSwitch(byte[] data) {
-                file = FileUtils.getFileFromBytes(data);
-                LogToastUtils.log(TAG, "switch");
-                handler.sendEmptyMessage(1);
-            }
-
-            @Override
-            public void onError() {
-                LogToastUtils.log(TAG, "error");
-            }
-
-            @Override
-            public void onCapture() {
-
-            }
-
-            @Override
-            public void onRegisterSuccess() {
-
-            }
-        });
-
+        }
     }
 
     private void clearText() {
@@ -726,7 +842,6 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         id_staff = findViewById(R.id.id_staff);
         sign_up_time = findViewById(R.id.sign_up_time);
         station_state = findViewById(R.id.station_state);
-        camera_preview = findViewById(R.id.camera_preview);
 
 
         change_mode.setOnClickListener(this);
@@ -736,6 +851,10 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
         setting_main.setOnClickListener(this);
 
         waiting_text = findViewById(R.id.waiting_text);
+
+        mGraphicOverlay = findViewById(R.id.faceOverlay);
+        mPreview = findViewById(R.id.preview);
+        rb_normal = findViewById(R.id.rb_normal);
 
     }
 
@@ -832,7 +951,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
                 startActivity(intent);
                 break;
             case R.id.setting_main:
-                intent = new Intent(this, GoogleTrackerTest.class);
+                intent = new Intent(this, LoginActivity.class);
                 intent.putExtra("type", 1);
                 startActivity(intent);
                 break;
@@ -860,6 +979,7 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     @Override
     protected void onPause() {
         super.onPause();
+        mPreview.stop();
         if (mTts != null) {
             mTts.stopSpeaking();
         }
@@ -875,6 +995,9 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mCameraSource != null) {
+            mCameraSource.release();
+        }
         identifyFace.finisheIdentify();
         identifyFace = null;
         if (mTts != null) {
@@ -917,35 +1040,153 @@ public class MainActivity extends CommonActivity implements View.OnClickListener
             switch (result) {
                 case "worktable":
                     robotSpeek("对方已经接受了您的请求，请您直接去他的工位或办公室!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！", "text");
+                    wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "combig":
                     robotSpeek("对方已经接受了您的请求，请您到大会议室等候!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！", "text");
+                    wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "comsmall":
                     robotSpeek("对方已经接受了您的请求，请您到小会议室等候!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！", "text");
+                    wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "talk1":
                     robotSpeek("对方已经接受了您的请求，请您到洽谈室1等候!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！", "text");
+                    wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "talk2":
                     robotSpeek("对方已经接受了您的请求，请您到洽谈室2等候!", 0);
-                    wxcpUtils.sendText(null, userid, "已经让对方通过！", "text");
+                    wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "reject":
                     robotSpeek("对方已经拒绝了您的请求，请您自行联系!", 0);
-                    wxcpUtils.sendText(null, userid, "已经拒绝对方！", "text");
+                    wxcpUtils.sendText(null, userid1, "已经拒绝对方！", "text");
                     break;
                 case "timeout":
                     robotSpeek("超过一分钟没有答复，请您自行联系!", 0);
-                    wxcpUtils.sendText(null, userid, "您超过一分钟没有回复，该信息已经失效！", "text");
+                    wxcpUtils.sendText(null, userid1, "您超过一分钟没有回复，该信息已经失效！", "text");
                     break;
             }
 
 
+        }
+    }
+    //==============================================================================================
+    // Graphic Face Tracker
+    //==============================================================================================
+
+    /**
+     * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
+     * uses this factory to create face trackers as needed -- one for each individual.
+     */
+    private class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
+        @Override
+        public Tracker<Face> create(Face face) {
+            return new GraphicFaceTracker(mGraphicOverlay);
+        }
+    }
+
+    /**
+     * Face tracker for each detected individual. This maintains a face graphic within the app's
+     * associated face overlay.
+     */
+    private class GraphicFaceTracker extends Tracker<Face> {
+        private GraphicOverlay mOverlay;
+        private FaceGraphic mFaceGraphic;
+        private boolean isFirst;
+        private float lastSmile;
+        private float firstSmile;
+
+        GraphicFaceTracker(GraphicOverlay overlay) {
+            mOverlay = overlay;
+            mFaceGraphic = new FaceGraphic(overlay, MainActivityN.this);
+
+
+        }
+
+
+        /**
+         * Start tracking the detected face instance within the face overlay.
+         */
+        @Override
+        public void onNewItem(int faceId, Face item) {
+            mFaceGraphic.setId(faceId);
+            isFirst = true;
+            mFaceGraphic.setIsFirst(isFirst);
+            firstSmile = item.getIsSmilingProbability();
+//            mSpeech.speak("请您微笑", TextToSpeech.QUEUE_FLUSH, null);
+//            mSpeech.speak("please smile", TextToSpeech.QUEUE_FLUSH, null);
+
+//            @SuppressLint("HandlerLeak")
+//            Handler handler = new Handler() {
+//                @Override
+//                public void handleMessage(Message msg) {
+//                    super.handleMessage(msg);
+//                    switch (msg.what){
+//                        case 0:
+//
+//                            break;
+//                    }
+//                }
+//            };
+//            handler.sendEmptyMessage(0);
+
+
+        }
+
+        /**
+         * Update the position/characteristics of the face within the overlay.
+         */
+        @Override
+        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
+            mOverlay.add(mFaceGraphic);
+            mFaceGraphic.updateFace(face);
+            Log.e("test", "test---------------" + detectionResults.detectorIsOperational());
+            Log.e("test", "test---------------" + face.getIsSmilingProbability());
+            lastSmile = face.getIsSmilingProbability();
+
+            rb_normal.setRating(lastSmile * 5);
+            if (isFirst && firstSmile <= 0.2 && lastSmile >= 0.6) {
+                mCameraSource.takePicture(new CameraSource.ShutterCallback() {
+                    @Override
+                    public void onShutter() {
+
+                    }
+                }, new CameraSource.PictureCallback() {
+                    @Override
+                    public void onPictureTaken(byte[] bytes) {
+                        if (bytes != null) {
+                            identifyFace.setData(bytes);
+//                            FileUtils.getFileFromBytes(bytes);
+//                            mTts.startSpeaking("打卡成功", null);
+//                            mSpeech.speak("success!", TextToSpeech.QUEUE_FLUSH, null);
+                            isFirst = false;
+                            mFaceGraphic.setIsFirst(isFirst);
+
+                        }
+                    }
+                });
+
+            }
+        }
+
+        /**
+         * Hide the graphic when the corresponding face was not detected.  This can happen for
+         * intermediate frames temporarily (e.g., if the face was momentarily blocked from
+         * view).
+         */
+        @Override
+        public void onMissing(FaceDetector.Detections<Face> detectionResults) {
+            mOverlay.remove(mFaceGraphic);
+        }
+
+        /**
+         * Called when the face is assumed to be gone for good. Remove the graphic annotation from
+         * the overlay.
+         */
+        @Override
+        public void onDone() {
+            mOverlay.remove(mFaceGraphic);
         }
     }
 }

@@ -66,7 +66,7 @@ public class RefreshService extends Service {
 
     private void getDataFromWX(final String userid) {
         //?fromUser=wuzhiying88&toUser=ww4c0daf999a9d1a67&createTime=1511921000
-        OkGo.<String>post("http://cnbeijing.xyz:8080/wzywx/GetAccess")
+        OkGo.<String>post("http://cnxa.top:8080/wzywx/GetAccess")
                 .params("fromUser", userid)
                 .params("toUser", getApplicationContext().getString(R.string.weixin_corp_id))
                 .params("createTime", System.currentTimeMillis() / 1000 - 5).execute(new StringCallback() {

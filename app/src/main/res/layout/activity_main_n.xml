@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/background13"
+    android:orientation="vertical"
+    tools:context="com.zgty.oarobot.activity.MainActivityN">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <TextView
+            android:id="@+id/mode_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="@string/oa_mode_name"
+            android:textColor="@color/yellowText"
+            android:textSize="@dimen/main_type_size" />
+
+        <TextView
+            android:id="@+id/waiting_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="@dimen/activity_main_padding"
+            android:layout_marginRight="@dimen/activity_main_padding"
+            android:gravity="center"
+            android:text="正在为您联系中，已等待1秒"
+            android:textSize="@dimen/edit_text_size"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/change_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/activity_main_padding"
+            android:layout_marginRight="@dimen/activity_main_padding"
+            android:clickable="true"
+            android:drawableEnd="@mipmap/change48"
+            android:drawableRight="@mipmap/change48"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="@string/mode_change"
+            android:textColor="@color/greenText"
+            android:textSize="18sp"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/activity_main_padding"
+            android:layout_weight="5"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/name_staff" />
+
+                <TextView
+                    android:id="@+id/name_staff"
+                    style="@style/AppTextView4"
+                    android:textColor="@color/greenText" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/id_staff" />
+
+                <TextView
+                    android:id="@+id/id_staff"
+                    style="@style/AppTextView4" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/name_part" />
+
+                <TextView
+                    android:id="@+id/name_part"
+                    style="@style/AppTextView4" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/sign_up_time" />
+
+                <TextView
+                    android:id="@+id/sign_up_time"
+                    style="@style/AppTextView4"
+                    android:textColor="@color/yellowText" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/AppTextView4"
+                    android:text="@string/sign_up_type" />
+
+                <TextView
+                    android:id="@+id/station_state"
+                    style="@style/AppTextView4"
+                    android:textColor="@color/redText" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/photo_main_padding"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <com.zgty.oarobot.camera.CameraSourcePreview
+                android:id="@+id/preview"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="7">
+
+                <com.zgty.oarobot.camera.GraphicOverlay
+                    android:id="@+id/faceOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </com.zgty.oarobot.camera.CameraSourcePreview>
+
+            <RatingBar
+                android:id="@+id/rb_normal"
+                style="@style/roomRatingBar"
+                android:layout_margin="15dp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <TextView
+            android:id="@+id/robot_speak_text"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:gravity="center"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/dialog_text_size" />
+
+        <TextView
+            android:id="@+id/setting_main"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:drawableRight="@mipmap/goto48"
+            android:gravity="center_vertical|right"
+            android:paddingRight="@dimen/activity_setting_padding"
+            android:text="@string/setting_type"
+            android:textColor="@color/greenText"
+            android:textSize="@dimen/edit_text_size" />
+    </LinearLayout>
+
+</LinearLayout>

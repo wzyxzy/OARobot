@@ -73,7 +73,9 @@ public class WXCPUtils {
                                 onWXCPUtilsListener.onError();
                                 LogToastUtils.log(TAG, "errorCode=" + tokenBack.getErrcode() + ",and errorMsg=" + tokenBack.getErrmsg());
                             } else {
-                                if (!type.equalsIgnoreCase("text")) {
+                                if (type.equalsIgnoreCase("text_out")) {
+                                    onWXCPUtilsListener.onSuccess();
+                                } else if (!type.equalsIgnoreCase("text")) {
                                     handler.sendEmptyMessage(1);
                                 }
 
