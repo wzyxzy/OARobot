@@ -97,6 +97,11 @@
             android:screenOrientation="landscape"
             android:theme="@style/MyActivityDialogStyle" />
         <activity
+            android:name=".activity.MakeSureFace2"
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape"
+            android:theme="@style/noticeDialogStyle" />
+        <activity
             android:name=".activity.TimeManageActivity"
             android:launchMode="singleTop"
             android:screenOrientation="landscape"

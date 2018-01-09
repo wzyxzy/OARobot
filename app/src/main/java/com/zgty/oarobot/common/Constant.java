@@ -10,7 +10,7 @@ public class Constant {
     public static final long WAITINGTIME = 60000;
     public static final String BROADCASTACTION = "com.zgty.oarobot";
     public static String pGroupId = "3242786592";
-    public static double pScoreDivider = 80;
+    public static double pScoreDivider = 60;
 
     public static String pSpeeker_xiaoyan = "xiaoyan";//小燕	青年    女声	中英文     （普通话）（系统默认）
     public static String pSpeeker_xiaoyu = "xiaoyu";//小宇	青年    男声	中英文（普通话）

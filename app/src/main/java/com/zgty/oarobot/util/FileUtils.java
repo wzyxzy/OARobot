@@ -35,8 +35,9 @@ public class FileUtils {
 
             // 在SDcard创建文件夹及文件
             file = new File(SDCardRoot.getPath() + FILE_PATH + "/robot_pic" + System.currentTimeMillis() + ".jpg");
-            if (file.getParentFile()==null){
-                file.getParentFile().mkdirs();// 创建文件夹
+            if (!file.exists()) {
+                File file2 = new File(file.getParent());
+                file2.mkdirs();
             }
 
 

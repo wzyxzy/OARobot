@@ -4,7 +4,7 @@ apply plugin: 'org.greenrobot.greendao'
 android {
     compileSdkVersion 26
     greendao {
-        schemaVersion 2
+        schemaVersion 3
         targetGenDir 'src/main/java'
     }
     defaultConfig {

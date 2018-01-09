@@ -41,6 +41,7 @@ import com.zgty.oarobot.bean.Account;
 import com.zgty.oarobot.bean.Speaking;
 import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.bean.Time;
+import com.zgty.oarobot.bean.Visitor;
 import com.zgty.oarobot.camera.CameraSourcePreview;
 import com.zgty.oarobot.camera.GraphicOverlay;
 import com.zgty.oarobot.common.CommonActivity;
@@ -49,6 +50,7 @@ import com.zgty.oarobot.dao.AccountDaoUtils;
 import com.zgty.oarobot.dao.SpeekDaoUtils;
 import com.zgty.oarobot.dao.StaffDaoUtils;
 import com.zgty.oarobot.dao.TimeDaoUtils;
+import com.zgty.oarobot.dao.VisitorDaoUtils;
 import com.zgty.oarobot.dao.WorkOnOffDaoUtils;
 import com.zgty.oarobot.receiver.DateTimeReceiver;
 import com.zgty.oarobot.service.RefreshService;
@@ -110,6 +112,8 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
     private boolean canConnect = true;
     private Handler handler1;
     private Runnable runnable;
+    private int hearingType;
+    private boolean isFirstConnect;
 
 
     private CameraSource mCameraSource = null;
@@ -133,9 +137,24 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                     break;
                 case 1:
                     robotSpeek(speekDaoUtils.querySpeekingText("cannotRecognise"), 1);
+                    hearingType = 0;
+                    isFirstConnect = true;
                     break;
                 case 2:
                     mIat = SpeechRecognizer.createRecognizer(getApplicationContext(), mInitListener);
+                    break;
+                case 3:
+                    List<Visitor> visitors = new VisitorDaoUtils(getApplicationContext()).queryVisitorList(userid);
+                    if (visitors != null && visitors.size() > 0) {
+                        Visitor visitor = visitors.get(0);
+                        String id = visitor.getVisit_id();
+                        userid1 = id;
+                        isFirstConnect = false;
+                        Staff staff = new StaffDaoUtils(getApplicationContext()).queryStaffList(id).get(0);
+                        username = staff.getName_user();
+                        robotSpeek(String.format("您是否联系%s? 您可以回答是或者否。", staff.getName_user()), 1);
+                        hearingType = 1;
+                    }
                     break;
             }
 
@@ -302,19 +321,37 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                     robotSpeek("现在已经可以打卡了!", 0);
                     return;
                 }
-                for (int i1 = 0; i1 < staffList.size(); i1++) {
-                    if (text.contains(staffList.get(i1).getName_user())) {
-
+                if (hearingType == 1) {
+                    hasPerson = true;
+                    if (text.contains("是")) {
                         if (canConnect) {
-                            robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2);
-                            userid1 = staffList.get(i1).getId();
+                            robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), username), 2);
+//                            userid1 = userid;
                         } else {
                             robotSpeek("前面已有联系任务，您还需等待" + time_second + "秒", 0);
                         }
-                        hasPerson = true;
-                        break;
+                    } else {
+                        robotSpeek("请说出您要找的人的名字", 1);
+                        hearingType = 0;
+                    }
+
+                } else {
+                    for (int i1 = 0; i1 < staffList.size(); i1++) {
+                        if (text.contains(staffList.get(i1).getName_user())) {
+
+                            if (canConnect) {
+                                robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2);
+                                userid1 = staffList.get(i1).getId();
+
+                            } else {
+                                robotSpeek("前面已有联系任务，您还需等待" + time_second + "秒", 0);
+                            }
+                            hasPerson = true;
+                            break;
+                        }
                     }
                 }
+
                 if (!hasPerson) {
                     robotSpeek(speekDaoUtils.querySpeekingText("connectByYourself"), 0);
                 }
@@ -420,6 +457,25 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                             showTip("播放完成");
 //                            WeiXinUtils weiXinUtils = new WeiXinUtils(getApplicationContext());
 //                            weiXinUtils.SendText("前台有人找您，他的照片发给您");
+                            VisitorDaoUtils visitorDaoUtils = new VisitorDaoUtils(getApplicationContext());
+                            if (isFirstConnect) {
+
+                                String visitorId = "visitor" + visitorDaoUtils.findVisitorNum();
+                                identifyFace.addStaff(visitorId);
+                                Visitor visitor = new Visitor();
+                                visitor.setId(visitorId);
+                                visitor.setTime(getNowDate());
+                                visitor.setVisit_id(userid1);
+                                visitor.setInfos("");
+                                visitorDaoUtils.insertVisitor(visitor);
+                            }else {
+                                Visitor visitor = new Visitor();
+                                visitor.setId(userid);
+                                visitor.setTime(getNowDate());
+                                visitor.setVisit_id(userid1);
+                                visitor.setInfos("");
+                                visitorDaoUtils.updateVisitor(visitor);
+                            }
                             wxcpUtils.sendText(file, userid1, "前台有人找您，您是否同意让他进来？", "image");
                             wxcpUtils.setOnWXCPUtilsListener(new WXCPUtils.OnWXCPUtilsListener() {
                                 @Override
@@ -667,9 +723,16 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             identifyFace = new IdentifyFace2(this, MAIN_CHECK_CAMERA_TYPE);
             identifyFace.setOnIdentifyListener(new IdentifyFace2.OnIdentifyListener() {
                 @Override
-                public void onSuccess(String user_id) {
-                    userid = user_id;
-                    handler.sendEmptyMessage(0);
+                public void onSuccess(String user_id, byte[] b) {
+                    if (b != null) {
+                        file = FileUtils.getFileFromBytes(b);
+                        handler.sendEmptyMessage(3);
+                        userid = user_id;
+                    } else {
+                        userid = user_id;
+                        handler.sendEmptyMessage(0);
+                    }
+
                 }
 
                 @Override
@@ -902,7 +965,6 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 
         } else {
             LogToastUtils.toastShort(this, "没有录入该信息");
-//            mTts.startSpeaking("没有录入该信息", null);
         }
 
     }
@@ -938,6 +1000,13 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
     //获取当前时间
     private String getNowTime() {
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm", Locale.CHINA);
+        Date curDate = new Date(System.currentTimeMillis());
+        return formatter.format(curDate);
+    }
+
+    //获取当前日期时间
+    private String getNowDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
         Date curDate = new Date(System.currentTimeMillis());
         return formatter.format(curDate);
     }
@@ -1058,6 +1127,26 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                     robotSpeek("对方已经接受了您的请求，请您到洽谈室2等候!", 0);
                     wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
+                case "wangxiaodi":
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司行政!", 2);
+                    wxcpUtils.sendText(null, userid1, "已经为对方转接至行政王晓迪！", "text");
+                    userid1="wangxiaodi04";
+                    break;
+                case "yuantong":
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司行政!", 2);
+                    wxcpUtils.sendText(null, userid1, "已经为对方转接至行政袁彤！", "text");
+                    userid1="yuantong05";
+                    break;
+                case "chenjingyi":
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司人事!", 2);
+                    wxcpUtils.sendText(null, userid1, "已经为对方转接至人事陈静怡！", "text");
+                    userid1="chenjingyi29";
+                    break;
+                case "songwei":
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司人事!", 2);
+                    wxcpUtils.sendText(null, userid1, "已经为对方转接至人事宋薇！", "text");
+                    userid1="wuzhiying16";
+                    break;
                 case "reject":
                     robotSpeek("对方已经拒绝了您的请求，请您自行联系!", 0);
                     wxcpUtils.sendText(null, userid1, "已经拒绝对方！", "text");
@@ -1113,7 +1202,13 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             mFaceGraphic.setId(faceId);
             isFirst = true;
             mFaceGraphic.setIsFirst(isFirst);
+//            if (item.getIsSmilingProbability() > 0) {
+//                firstSmile = item.getIsSmilingProbability();
+//            } else {
+//                firstSmile = 0;
+//            }
             firstSmile = item.getIsSmilingProbability();
+
 //            mSpeech.speak("请您微笑", TextToSpeech.QUEUE_FLUSH, null);
 //            mSpeech.speak("please smile", TextToSpeech.QUEUE_FLUSH, null);
 
@@ -1144,9 +1239,18 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             Log.e("test", "test---------------" + detectionResults.detectorIsOperational());
             Log.e("test", "test---------------" + face.getIsSmilingProbability());
             lastSmile = face.getIsSmilingProbability();
-
+            if (firstSmile <= 0) {
+                firstSmile = lastSmile;
+            }
+            if (lastSmile <= 0) {
+                return;
+            }
+            if (lastSmile > 0 && lastSmile < firstSmile) {
+                firstSmile = lastSmile;
+            }
             rb_normal.setRating(lastSmile * 5);
-            if (isFirst && firstSmile <= 0.2 && lastSmile >= 0.6) {
+            if (isFirst && lastSmile - firstSmile >= 0.6) {
+                Log.e("smile", "lastSmile is " + lastSmile + ", firstSmile is " + firstSmile);
                 mCameraSource.takePicture(new CameraSource.ShutterCallback() {
                     @Override
                     public void onShutter() {

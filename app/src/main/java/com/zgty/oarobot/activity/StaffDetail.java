@@ -22,6 +22,7 @@ import com.zgty.oarobot.dao.StaffDaoUtils;
 import com.zgty.oarobot.dao.WorkOnOffDaoUtils;
 import com.zgty.oarobot.util.ContactUtils;
 import com.zgty.oarobot.util.IdentifyFace;
+import com.zgty.oarobot.util.IdentifyFace2;
 import com.zgty.oarobot.util.LogToastUtils;
 import com.zgty.oarobot.widget.MyDialog;
 
@@ -51,7 +52,7 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
     private boolean firstAdd;
     private ArrayAdapter<String> adapter;//spinner的adapter
     private List<String> workType = new ArrayList<String>();//接待类型：工位，办公室
-    private IdentifyFace identifyFace;
+    private IdentifyFace2 identifyFace;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
@@ -81,12 +82,12 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
         staff_id = getIntent().getStringExtra("staff_id");
 
         switch (detail_type) {
-            case 0:
+            case 0://录入
                 resetAllEdit();
                 makeStaffCanEdit();
                 firstAdd = true;
                 break;
-            case 1:
+            case 1://详情
                 setDetails();
                 makeStaffCannotEdit();
                 firstAdd = false;
@@ -316,7 +317,7 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                     //重新录入，先删除再录入
                     deleteFace(false);
                 } else {
-                    Intent intent = new Intent(this, MakeSureFace.class);
+                    Intent intent = new Intent(this, MakeSureFace2.class);
                     intent.putExtra("staff_id", staff_id);
                     startActivityForResult(intent, 11);
                 }
@@ -329,11 +330,11 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
 
     private void deleteFace(final boolean isFinish) {
         if (identifyFace == null)
-            identifyFace = new IdentifyFace(this);
+            identifyFace = new IdentifyFace2(this);
         identifyFace.deleteFace(staff_id);
-        identifyFace.setOnIdentifyListener(new IdentifyFace.OnIdentifyListener() {
+        identifyFace.setOnIdentifyListener(new IdentifyFace2.OnIdentifyListener() {
             @Override
-            public void onSuccess(String user_id) {
+            public void onSuccess(String user_id, byte[] b) {
 
             }
 
@@ -359,7 +360,7 @@ public class StaffDetail extends CommonActivity implements View.OnClickListener 
                     finish();
 
                 } else {
-                    Intent intent = new Intent(getApplicationContext(), MakeSureFace.class);
+                    Intent intent = new Intent(getApplicationContext(), MakeSureFace2.class);
                     intent.putExtra("staff_id", staff_id);
                     startActivityForResult(intent, 11);
                 }

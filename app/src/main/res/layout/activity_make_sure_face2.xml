@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="800dp"
+    android:layout_height="600dp"
+    android:layout_gravity="center"
+    android:clickable="true"
+    android:orientation="vertical"
+    tools:context="com.zgty.oarobot.activity.MakeSureFace2">
+
+    <com.zgty.oarobot.camera.CameraSourcePreview
+        android:id="@+id/preview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5">
+
+        <com.zgty.oarobot.camera.GraphicOverlay
+            android:id="@+id/faceOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.zgty.oarobot.camera.CameraSourcePreview>
+
+    <LinearLayout
+        android:id="@+id/edit_sure_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:visibility="invisible">
+
+        <TextView
+            android:id="@+id/edit_cancel"
+            style="@style/AppTextView4"
+            android:clickable="true"
+            android:drawableLeft="@mipmap/cancel"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:paddingLeft="@dimen/photo_main_padding"
+            android:text="@string/record_again"
+            android:textColor="@color/redText" />
+
+        <TextView
+            android:id="@+id/edit_sure"
+            style="@style/AppTextView4"
+            android:clickable="true"
+            android:drawableLeft="@mipmap/sure"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:paddingLeft="@dimen/photo_main_padding"
+            android:text="@string/sure_name"
+            android:textColor="@color/greenText" />
+    </LinearLayout>
+</LinearLayout>
