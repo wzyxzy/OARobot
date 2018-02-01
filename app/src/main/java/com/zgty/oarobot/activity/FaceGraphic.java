@@ -110,7 +110,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             canvas.drawText("请您微笑", x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint);
 
         } else {
-            canvas.drawText("打卡成功！", x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint);
+            canvas.drawText("识别成功！", x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint);
 
         }
 //        canvas.drawText("笑容指数: " + String.format("%.2f", face.getIsSmilingProbability()), x - ID_X_OFFSET, y - ID_Y_OFFSET, mIdPaint);

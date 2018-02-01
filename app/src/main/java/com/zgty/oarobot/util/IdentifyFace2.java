@@ -446,9 +446,10 @@ public class IdentifyFace2 {
 //                            mCamera.startPreview();
 //                    }
 //                }, 15000);
-            } else {
+            } else if (error.getErrorCode() == 11700) {
 //                mTts.startSpeaking("没有检测到人脸", null);
 //                startCameraView();
+//                LogToastUtils.toastShort(context, "请您调整位置再试");
 
             }
 
@@ -481,9 +482,9 @@ public class IdentifyFace2 {
         UserIdentify userIdentify = gson.fromJson(resultStr, UserIdentify.class);
         if (ErrorCode.SUCCESS == userIdentify.getRet()) {
             if (userIdentify.getIfv_result().getCandidates().get(0).getScore() > pScoreDivider) {
-                if (userIdentify.getIfv_result().getCandidates().get(0).getUser().startsWith("visitor")){
+                if (userIdentify.getIfv_result().getCandidates().get(0).getUser().startsWith("visitor")) {
                     onIdentifyListener.onSuccess(userIdentify.getIfv_result().getCandidates().get(0).getUser(), data);
-                }else {
+                } else {
                     onIdentifyListener.onSuccess(userIdentify.getIfv_result().getCandidates().get(0).getUser(), null);
                 }
 

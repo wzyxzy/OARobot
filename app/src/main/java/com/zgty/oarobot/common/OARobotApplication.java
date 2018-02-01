@@ -5,8 +5,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
+import com.baidu.ocr.sdk.OCR;
+import com.baidu.ocr.sdk.OnResultListener;
+import com.baidu.ocr.sdk.exception.OCRError;
+import com.baidu.ocr.sdk.model.AccessToken;
 import com.facebook.stetho.Stetho;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
@@ -23,11 +28,13 @@ import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.zgty.oarobot.R;
 import com.zgty.oarobot.util.LogToastUtils;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import okhttp3.OkHttpClient;
 
+import static com.zgty.oarobot.common.Constant.pSpeeker_xiaolin;
 import static com.zgty.oarobot.common.Constant.pSpeeker_xiaoqi;
 import static com.zgty.oarobot.common.Constant.pSpeeker_xiaoyan;
 
@@ -41,6 +48,8 @@ public class OARobotApplication extends Application {
     // 语音合成对象
     public static SpeechSynthesizer mTts;
 
+    //是否通过身份证验证
+    public static final boolean isNeedId = true;
     // 默认云端发音人
     public static String voicerCloud = pSpeeker_xiaoyan;
     // 默认本地发音人
@@ -54,6 +63,9 @@ public class OARobotApplication extends Application {
 
     private static OARobotApplication instance;
 
+    public static TextToSpeech mSpeech;
+    public static boolean canUserGoogleTTS;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -61,10 +73,28 @@ public class OARobotApplication extends Application {
         initStetho();
         initOKGo();
         initTTS();
+        initBaiduId();
         instance = this;
 
-        mTts.startSpeaking("欢迎使用中广通业考勤系统", null);
 
+    }
+
+    private void initBaiduId() {
+
+        OCR.getInstance().initAccessTokenWithAkSk(new OnResultListener<AccessToken>() {
+            @Override
+            public void onResult(AccessToken result) {
+                // 调用成功，返回AccessToken对象
+                String token = result.getAccessToken();
+                Log.e("success", token);
+            }
+
+            @Override
+            public void onError(OCRError error) {
+                // 调用失败，返回OCRError子类SDKError对象
+                Log.e("failed", error.getLocalizedMessage());
+            }
+        }, getApplicationContext(), "0eWNc2Lf8dChWjI89XEFxzf5", "r4T0RrOY3NElBrdCcWEHeofoB0saGgBE");
 
     }
 
@@ -103,6 +133,7 @@ public class OARobotApplication extends Application {
     }
 
     private void initTTS() {
+
         // 初始化合成对象
         mTts = SpeechSynthesizer.createSynthesizer(this, mTtsInitListener);
         if (null == mTts) {
@@ -115,9 +146,9 @@ public class OARobotApplication extends Application {
         //设置发音人
         mTts.setParameter(SpeechConstant.VOICE_NAME, voicerCloud);
         //设置合成语速
-        mTts.setParameter(SpeechConstant.SPEED, "50");
+        mTts.setParameter(SpeechConstant.SPEED, "55");
         //设置合成音调
-        mTts.setParameter(SpeechConstant.PITCH, "50");
+        mTts.setParameter(SpeechConstant.PITCH, "45");
         //设置合成音量
         mTts.setParameter(SpeechConstant.VOLUME, "50");
         //设置播放器音频流类型
@@ -130,6 +161,24 @@ public class OARobotApplication extends Application {
         // 注：AUDIO_FORMAT参数语记需要更新版本才能生效
         mTts.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
         mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, Environment.getExternalStorageDirectory() + "/msc/tts.wav");
+        //谷歌语音使用，已忽略
+//        mSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+//
+//            @Override
+//            public void onInit(int status) {
+//                // TODO Auto-generated method stub
+//                if (status == TextToSpeech.SUCCESS) {
+//                    mSpeech.setLanguage(Locale.CHINA);    //设置语言为英语
+////                    mSpeech.speak("welcome to use '中广同业' OA System", TextToSpeech.QUEUE_FLUSH, null);
+//                    mSpeech.speak("欢迎使用中广通业考勤接待系统", TextToSpeech.QUEUE_FLUSH, null);
+//                    canUserGoogleTTS = true;
+//                } else {
+        canUserGoogleTTS = false;
+        mTts.startSpeaking("欢迎使用中广通业考勤接待系统", null);
+//                }
+//            }
+//        });
+//
     }
 
     private void initOARobot() {
