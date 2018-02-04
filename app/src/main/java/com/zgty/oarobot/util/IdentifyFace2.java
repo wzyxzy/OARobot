@@ -449,7 +449,7 @@ public class IdentifyFace2 {
             } else if (error.getErrorCode() == 11700) {
 //                mTts.startSpeaking("没有检测到人脸", null);
 //                startCameraView();
-//                LogToastUtils.toastShort(context, "请您调整位置再试");
+                LogToastUtils.toastShort(context, "请您调整位置再试");
 
             }
 

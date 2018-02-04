@@ -49,7 +49,7 @@ public class OARobotApplication extends Application {
     public static SpeechSynthesizer mTts;
 
     //是否通过身份证验证
-    public static final boolean isNeedId = true;
+    public static final boolean isNeedId = false;
     // 默认云端发音人
     public static String voicerCloud = pSpeeker_xiaoyan;
     // 默认本地发音人
