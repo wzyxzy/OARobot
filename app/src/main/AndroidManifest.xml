@@ -45,7 +45,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:screenOrientation="landscape"
+        android:screenOrientation="portrait"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
@@ -58,7 +58,7 @@
         <activity
             android:name=".activity.MainActivityN"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape"
+            android:hardwareAccelerated="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -69,52 +69,42 @@
         <activity
             android:name=".activity.AdminActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".activity.ChatActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".activity.MainActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".activity.StaffManager"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".activity.StaffDetail"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".activity.MakeSureFace"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/MyActivityDialogStyle" />
         <activity
             android:name=".activity.MakeSureFace2"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/noticeDialogStyle" />
         <activity
             android:name=".activity.TimeManageActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".activity.LoginActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".activity.SpeekManage"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <service
@@ -134,7 +124,6 @@
         <activity
             android:name=".activity.GoogleTrackerTest"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
     </application>
 

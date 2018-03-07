@@ -64,17 +64,17 @@ public class CameraView extends FrameLayout {
     public static final int NATIVE_AUTH_INIT_SUCCESS = 0;
 
     /**
-     * 本地模型授权，加载成功
+     * 本地模型授权，缺少SO
      */
     public static final int NATIVE_SOLOAD_FAIL = 10;
 
     /**
-     * 本地模型授权，加载成功
+     * 本地模型授权，授权失败，token异常
      */
     public static final int NATIVE_AUTH_FAIL = 11;
 
     /**
-     * 本地模型授权，加载成功
+     * 本地模型授权，模型加载失败
      */
     public static final int NATIVE_INIT_FAIL = 12;
 
@@ -245,6 +245,14 @@ public class CameraView extends FrameLayout {
         if (cameraControl.getAbortingScan().get()) {
             return 0;
         }
+
+        Rect previewFrame = cameraControl.getPreviewFrame();
+
+        if (maskView.getWidth() == 0 || maskView.getHeight() == 0
+                || previewFrame.width() == 0 || previewFrame.height() == 0) {
+            return 0;
+        }
+
         // BitmapRegionDecoder不会将整个图片加载到内存。
         BitmapRegionDecoder decoder = null;
         try {
@@ -253,14 +261,12 @@ public class CameraView extends FrameLayout {
             e.printStackTrace();
         }
 
-        Rect previewFrame = cameraControl.getPreviewFrame();
-
         int width = rotation % 180 == 0 ? decoder.getWidth() : decoder.getHeight();
         int height = rotation % 180 == 0 ? decoder.getHeight() : decoder.getWidth();
 
         Rect frameRect = maskView.getFrameRectExtend();
 
-        int left = width * frameRect.left / maskView.getWidth();
+        int left =  width * frameRect.left / maskView.getWidth();
         int top = height * frameRect.top / maskView.getHeight();
         int right = width * frameRect.right / maskView.getWidth();
         int bottom = height * frameRect.bottom / maskView.getHeight();
@@ -499,10 +505,17 @@ public class CameraView extends FrameLayout {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private Bitmap crop(File outputFile, byte[] data, int rotation) {
         try {
+            Rect previewFrame = cameraControl.getPreviewFrame();
+
+            if (maskView.getWidth() == 0 || maskView.getHeight() == 0
+                    || previewFrame.width() == 0 || previewFrame.height() == 0) {
+                return null;
+            }
+
             // BitmapRegionDecoder不会将整个图片加载到内存。
             BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(data, 0, data.length, true);
 
-            Rect previewFrame = cameraControl.getPreviewFrame();
+
 
             int width = rotation % 180 == 0 ? decoder.getWidth() : decoder.getHeight();
             int height = rotation % 180 == 0 ? decoder.getHeight() : decoder.getWidth();

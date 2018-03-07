@@ -3,8 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://D:\android_project\OARobot4\OARobot.iml" filepath="D:\android_project\OARobot4\OARobot.iml" />
-      <module fileurl="file://$PROJECT_DIR$/OARobot4.iml" filepath="$PROJECT_DIR$/OARobot4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/OARobot8.iml" filepath="$PROJECT_DIR$/OARobot8.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ocr_ui/ocr_ui.iml" filepath="$PROJECT_DIR$/ocr_ui/ocr_ui.iml" />
     </modules>
   </component>
 </project>

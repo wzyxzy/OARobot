@@ -49,7 +49,9 @@ public class OARobotApplication extends Application {
     public static SpeechSynthesizer mTts;
 
     //是否通过身份证验证
-    public static final boolean isNeedId = true;
+    public static final boolean isNeedId = false;
+    //是否需要语音录制
+    public static final boolean isNeedVoice = false;
     // 默认云端发音人
     public static String voicerCloud = pSpeeker_xiaoyan;
     // 默认本地发音人
@@ -94,7 +96,7 @@ public class OARobotApplication extends Application {
                 // 调用失败，返回OCRError子类SDKError对象
                 Log.e("failed", error.getLocalizedMessage());
             }
-        }, getApplicationContext(), "0eWNc2Lf8dChWjI89XEFxzf5", "r4T0RrOY3NElBrdCcWEHeofoB0saGgBE");
+        }, getApplicationContext(), "oEAoiQphQexu7jqXLMng19I3", "9t84pBYWV1D9EF5sujYiSxTDbgHYq2Kb");
 
     }
 
@@ -150,7 +152,7 @@ public class OARobotApplication extends Application {
         //设置合成音调
         mTts.setParameter(SpeechConstant.PITCH, "45");
         //设置合成音量
-        mTts.setParameter(SpeechConstant.VOLUME, "50");
+        mTts.setParameter(SpeechConstant.VOLUME, "25");
         //设置播放器音频流类型
         mTts.setParameter(SpeechConstant.STREAM_TYPE, "3");
 
@@ -174,7 +176,7 @@ public class OARobotApplication extends Application {
 //                    canUserGoogleTTS = true;
 //                } else {
         canUserGoogleTTS = false;
-        mTts.startSpeaking("欢迎使用中广通业考勤接待系统", null);
+
 //                }
 //            }
 //        });

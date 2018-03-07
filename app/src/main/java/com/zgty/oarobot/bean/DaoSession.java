@@ -10,6 +10,7 @@ import org.greenrobot.greendao.internal.DaoConfig;
 
 import com.zgty.oarobot.bean.AccessTokenWX;
 import com.zgty.oarobot.bean.Account;
+import com.zgty.oarobot.bean.IdCard;
 import com.zgty.oarobot.bean.Speaking;
 import com.zgty.oarobot.bean.Staff;
 import com.zgty.oarobot.bean.Time;
@@ -18,6 +19,7 @@ import com.zgty.oarobot.bean.WorkOnOff;
 
 import com.zgty.oarobot.bean.AccessTokenWXDao;
 import com.zgty.oarobot.bean.AccountDao;
+import com.zgty.oarobot.bean.IdCardDao;
 import com.zgty.oarobot.bean.SpeakingDao;
 import com.zgty.oarobot.bean.StaffDao;
 import com.zgty.oarobot.bean.TimeDao;
@@ -35,6 +37,7 @@ public class DaoSession extends AbstractDaoSession {
 
     private final DaoConfig accessTokenWXDaoConfig;
     private final DaoConfig accountDaoConfig;
+    private final DaoConfig idCardDaoConfig;
     private final DaoConfig speakingDaoConfig;
     private final DaoConfig staffDaoConfig;
     private final DaoConfig timeDaoConfig;
@@ -43,6 +46,7 @@ public class DaoSession extends AbstractDaoSession {
 
     private final AccessTokenWXDao accessTokenWXDao;
     private final AccountDao accountDao;
+    private final IdCardDao idCardDao;
     private final SpeakingDao speakingDao;
     private final StaffDao staffDao;
     private final TimeDao timeDao;
@@ -58,6 +62,9 @@ public class DaoSession extends AbstractDaoSession {
 
         accountDaoConfig = daoConfigMap.get(AccountDao.class).clone();
         accountDaoConfig.initIdentityScope(type);
+
+        idCardDaoConfig = daoConfigMap.get(IdCardDao.class).clone();
+        idCardDaoConfig.initIdentityScope(type);
 
         speakingDaoConfig = daoConfigMap.get(SpeakingDao.class).clone();
         speakingDaoConfig.initIdentityScope(type);
@@ -76,6 +83,7 @@ public class DaoSession extends AbstractDaoSession {
 
         accessTokenWXDao = new AccessTokenWXDao(accessTokenWXDaoConfig, this);
         accountDao = new AccountDao(accountDaoConfig, this);
+        idCardDao = new IdCardDao(idCardDaoConfig, this);
         speakingDao = new SpeakingDao(speakingDaoConfig, this);
         staffDao = new StaffDao(staffDaoConfig, this);
         timeDao = new TimeDao(timeDaoConfig, this);
@@ -84,6 +92,7 @@ public class DaoSession extends AbstractDaoSession {
 
         registerDao(AccessTokenWX.class, accessTokenWXDao);
         registerDao(Account.class, accountDao);
+        registerDao(IdCard.class, idCardDao);
         registerDao(Speaking.class, speakingDao);
         registerDao(Staff.class, staffDao);
         registerDao(Time.class, timeDao);
@@ -94,6 +103,7 @@ public class DaoSession extends AbstractDaoSession {
     public void clear() {
         accessTokenWXDaoConfig.clearIdentityScope();
         accountDaoConfig.clearIdentityScope();
+        idCardDaoConfig.clearIdentityScope();
         speakingDaoConfig.clearIdentityScope();
         staffDaoConfig.clearIdentityScope();
         timeDaoConfig.clearIdentityScope();
@@ -107,6 +117,10 @@ public class DaoSession extends AbstractDaoSession {
 
     public AccountDao getAccountDao() {
         return accountDao;
+    }
+
+    public IdCardDao getIdCardDao() {
+        return idCardDao;
     }
 
     public SpeakingDao getSpeakingDao() {

@@ -2,11 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/oa_robot_ll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@mipmap/background13"
-    android:orientation="vertical"
-    tools:context="com.zgty.oarobot.activity.MainActivityN">
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -156,7 +156,7 @@
                 android:id="@+id/preview"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="7">
+                android:layout_weight="4">
 
                 <com.zgty.oarobot.camera.GraphicOverlay
                     android:id="@+id/faceOverlay"
@@ -168,10 +168,10 @@
             <RatingBar
                 android:id="@+id/rb_normal"
                 style="@style/roomRatingBar"
-                android:layout_margin="15dp"
-                android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_margin="0dp"
                 android:layout_weight="1" />
         </LinearLayout>
     </LinearLayout>
@@ -186,6 +186,7 @@
             android:layout_height="match_parent"
             android:layout_weight="5"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/robot_speak_text"
                 android:layout_width="match_parent"
@@ -194,12 +195,13 @@
                 android:gravity="center"
                 android:textColor="@color/colorAccent"
                 android:textSize="@dimen/dialog_text_size" />
+
             <TextView
                 android:id="@+id/robot_state_text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="2"
                 android:layout_marginLeft="@dimen/staff_item_height"
+                android:layout_weight="2"
                 android:textColor="@color/grey4Text"
                 android:textSize="@dimen/edit_text_size" />
         </LinearLayout>

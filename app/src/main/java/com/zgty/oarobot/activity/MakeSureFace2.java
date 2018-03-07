@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
@@ -25,6 +24,7 @@ import com.zgty.oarobot.R;
 import com.zgty.oarobot.camera.CameraSourcePreview;
 import com.zgty.oarobot.camera.GraphicOverlay;
 import com.zgty.oarobot.common.CommonSActivity;
+import com.zgty.oarobot.util.CameraSource2;
 import com.zgty.oarobot.util.FileUtils;
 import com.zgty.oarobot.util.IdentifyFace;
 import com.zgty.oarobot.util.IdentifyFace2;
@@ -44,7 +44,7 @@ public class MakeSureFace2 extends CommonSActivity implements View.OnClickListen
     private LinearLayout edit_sure_cancel;
     private String staff_id;
     private IdentifyFace2 identifyFace;
-    private CameraSource mCameraSource = null;
+    private CameraSource2 mCameraSource = null;
 
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
@@ -132,9 +132,9 @@ public class MakeSureFace2 extends CommonSActivity implements View.OnClickListen
             Log.w(TAG, "Face detector dependencies are not yet available.");
         }
 
-        mCameraSource = new CameraSource.Builder(context, detector)
+        mCameraSource = new CameraSource2.Builder(context, detector)
                 .setRequestedPreviewSize(640, 480)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setFacing(CameraSource2.CAMERA_FACING_BACK)
                 .setRequestedFps(30.0f)
                 .build();
     }
@@ -333,12 +333,12 @@ public class MakeSureFace2 extends CommonSActivity implements View.OnClickListen
             }
             if (isFirst && lastSmile - firstSmile >= 0.6) {
                 Log.e("smile", "lastSmile is " + lastSmile + ", firstSmile is " + firstSmile);
-                mCameraSource.takePicture(new CameraSource.ShutterCallback() {
+                mCameraSource.takePicture(new CameraSource2.ShutterCallback() {
                     @Override
                     public void onShutter() {
 
                     }
-                }, new CameraSource.PictureCallback() {
+                }, new CameraSource2.PictureCallback() {
                     @Override
                     public void onPictureTaken(byte[] bytes) {
                         if (bytes != null) {

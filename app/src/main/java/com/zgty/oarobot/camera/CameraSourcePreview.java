@@ -24,7 +24,8 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 
 import com.google.android.gms.common.images.Size;
-import com.google.android.gms.vision.CameraSource;
+import com.zgty.oarobot.util.CameraSource2;
+
 
 import java.io.IOException;
 
@@ -35,7 +36,7 @@ public class CameraSourcePreview extends ViewGroup {
     private SurfaceView mSurfaceView;
     private boolean mStartRequested;
     private boolean mSurfaceAvailable;
-    private CameraSource mCameraSource;
+    private CameraSource2 mCameraSource;
 
     private GraphicOverlay mOverlay;
 
@@ -50,7 +51,7 @@ public class CameraSourcePreview extends ViewGroup {
         addView(mSurfaceView);
     }
 
-    public void start(CameraSource cameraSource) throws IOException {
+    public void start(CameraSource2 cameraSource) throws IOException {
         if (cameraSource == null) {
             stop();
         }
@@ -63,7 +64,7 @@ public class CameraSourcePreview extends ViewGroup {
         }
     }
 
-    public void start(CameraSource cameraSource, GraphicOverlay overlay) throws IOException {
+    public void start(CameraSource2 cameraSource, GraphicOverlay overlay) throws IOException {
         mOverlay = overlay;
         start(cameraSource);
     }
@@ -83,6 +84,7 @@ public class CameraSourcePreview extends ViewGroup {
 
     private void startIfReady() throws IOException {
         if (mStartRequested && mSurfaceAvailable) {
+
             mCameraSource.start(mSurfaceView.getHolder());
             if (mOverlay != null) {
                 Size size = mCameraSource.getPreviewSize();
@@ -168,13 +170,13 @@ public class CameraSourcePreview extends ViewGroup {
     private boolean isPortraitMode() {
         int orientation = mContext.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            return false;
+            return true;
         }
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            return true;
+            return false;
         }
 
         Log.d(TAG, "isPortraitMode returning false by default");
-        return false;
+        return true;
     }
 }

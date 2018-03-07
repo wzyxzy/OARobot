@@ -39,6 +39,7 @@ public class CameraActivity extends Activity {
     public static final String KEY_CONTENT_TYPE = "contentType";
     public static final String KEY_NATIVE_TOKEN = "nativeToken";
     public static final String KEY_NATIVE_ENABLE = "nativeEnable";
+    public static final String KEY_NATIVE_MANUAL = "nativeEnableManual";
 
     public static final String CONTENT_TYPE_GENERAL = "general";
     public static final String CONTENT_TYPE_ID_CARD_FRONT = "IDCardFront";
@@ -52,6 +53,9 @@ public class CameraActivity extends Activity {
     private File outputFile;
     private String contentType;
     private Handler handler = new Handler();
+
+    private boolean isNativeEnable;
+    private boolean isNativeManual;
 
     private OCRCameraLayout takePictureContainer;
     private OCRCameraLayout cropContainer;
@@ -72,6 +76,7 @@ public class CameraActivity extends Activity {
             return false;
         }
     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,8 +129,10 @@ public class CameraActivity extends Activity {
     private void initParams() {
         String outputPath = getIntent().getStringExtra(KEY_OUTPUT_FILE_PATH);
         final String token = getIntent().getStringExtra(KEY_NATIVE_TOKEN);
-        boolean isNativeEnable = getIntent().getBooleanExtra(KEY_NATIVE_ENABLE, true);
-        if (token == null) {
+        isNativeEnable = getIntent().getBooleanExtra(KEY_NATIVE_ENABLE, true);
+        isNativeManual = getIntent().getBooleanExtra(KEY_NATIVE_MANUAL, false);
+
+        if (token == null && !isNativeManual) {
             isNativeEnable = false;
         }
 
@@ -166,7 +173,7 @@ public class CameraActivity extends Activity {
 
         // 身份证本地能力初始化
         if (maskType == MaskView.MASK_TYPE_ID_CARD_FRONT || maskType == MaskView.MASK_TYPE_ID_CARD_BACK) {
-            if (isNativeEnable) {
+            if (isNativeEnable && !isNativeManual) {
                 initNative(token);
             }
         }
@@ -176,28 +183,11 @@ public class CameraActivity extends Activity {
     }
 
     private void initNative(final String token) {
-        CameraThreadPool.execute(new Runnable() {
+        CameraNativeHelper.init(CameraActivity.this, token,
+                new CameraNativeHelper.CameraNativeInitCallback() {
             @Override
-            public void run() {
-                // 加载本地so失败, 异常返回getloadSoException
-                if (IDcardQualityProcess.getLoadSoException() != null) {
-                    cameraView.setInitNativeStatus(CameraView.NATIVE_SOLOAD_FAIL);
-                    return;
-                }
-                // 授权状态
-                int authStatus = IDcardQualityProcess.init(token);
-                // 加载模型状态
-                int initModelStatus = IDcardQualityProcess.getInstance()
-                        .idcardQualityInit(CameraActivity.this.getAssets(),
-                                "models");
-                if (authStatus != 0) {
-                    cameraView.setInitNativeStatus(CameraView.NATIVE_AUTH_FAIL);
-                    return;
-                }
-                if (initModelStatus != 0) {
-                    cameraView.setInitNativeStatus(CameraView.NATIVE_INIT_FAIL);
-                    return;
-                }
+            public void onError(int errorCode, Throwable e) {
+                cameraView.setInitNativeStatus(errorCode);
             }
         });
     }
@@ -403,7 +393,12 @@ public class CameraActivity extends Activity {
 
     private String getRealPathFromURI(Uri contentURI) {
         String result;
-        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(contentURI, null, null, null, null);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         if (cursor == null) {
             result = contentURI.getPath();
         } else {
@@ -484,12 +479,14 @@ public class CameraActivity extends Activity {
     }
 
     /**
-     * 做一些收尾工作，把这些工作从onDestory中移到正确的位置
-     * 可以以防止新的activity启动后被调用
+     * 做一些收尾工作
+     *
      */
     private void doClear() {
         CameraThreadPool.cancelAutoFocusTimer();
-        IDcardQualityProcess.getInstance().releaseModel();
+        if (isNativeEnable && !isNativeManual) {
+            IDcardQualityProcess.getInstance().releaseModel();
+        }
     }
 
 

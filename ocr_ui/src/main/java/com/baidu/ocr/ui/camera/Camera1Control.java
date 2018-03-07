@@ -150,7 +150,7 @@ public class Camera1Control implements ICameraControl {
 
     @Override
     public void start() {
-
+        startPreview(false);
     }
 
     @Override
@@ -220,17 +220,23 @@ public class Camera1Control implements ICameraControl {
             parameters.setPictureSize(picSize.width, picSize.height);
             camera.setParameters(parameters);
             takingPicture.set(true);
-
-            camera.takePicture(null, null, new Camera.PictureCallback() {
+            cancelAutoFocus();
+            CameraThreadPool.execute(new Runnable() {
                 @Override
-                public void onPictureTaken(byte[] data, Camera camera) {
-                    startPreview(false);
-                    takingPicture.set(false);
-                    if (onTakePictureCallback != null) {
-                        onTakePictureCallback.onPictureTaken(data);
-                    }
+                public void run() {
+                    camera.takePicture(null, null, new Camera.PictureCallback() {
+                        @Override
+                        public void onPictureTaken(byte[] data, Camera camera) {
+                            startPreview(false);
+                            takingPicture.set(false);
+                            if (onTakePictureCallback != null) {
+                                onTakePictureCallback.onPictureTaken(data);
+                            }
+                        }
+                    });
                 }
             });
+
         } catch (RuntimeException e) {
             e.printStackTrace();
             startPreview(false);;
@@ -323,7 +329,7 @@ public class Camera1Control implements ICameraControl {
                     }
                 }
                 try {
-                    camera = android.hardware.Camera.open(cameraId);
+                    camera = Camera.open(cameraId);
                 } catch (Throwable e) {
                     e.printStackTrace();
                     startPreview(true);
@@ -354,6 +360,7 @@ public class Camera1Control implements ICameraControl {
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
             opPreviewSize(previewView.getWidth(), previewView.getHeight());
+            startPreview(false);
             setPreviewCallbackImpl();
         }
 
@@ -380,26 +387,35 @@ public class Camera1Control implements ICameraControl {
         if (camera == null) {
             initCamera();
         } else {
-             camera.startPreview();
-             CameraThreadPool.createAutoFocusTimerTask(new Runnable() {
-                 @Override
-                 public void run() {
-                     synchronized (Camera1Control.this) {
-                         if (camera != null && !takingPicture.get()) {
-                             try {
-                                 camera.autoFocus(new Camera.AutoFocusCallback() {
-                                     @Override
-                                     public void onAutoFocus(boolean success, Camera camera) {
-                                     }
-                                 });
-                             } catch (Throwable e) {
-                                 // startPreview是异步实现，可能在某些机器上前几次调用会autofocus failß
-                             }
-                         }
-                 }
-                 }
-             });
+            camera.startPreview();
+            startAutoFocus();
         }
+    }
+
+    private void cancelAutoFocus() {
+        camera.cancelAutoFocus();
+        CameraThreadPool.cancelAutoFocusTimer();
+    }
+
+    private void startAutoFocus() {
+        CameraThreadPool.createAutoFocusTimerTask(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (Camera1Control.this) {
+                    if (camera != null && !takingPicture.get()) {
+                        try {
+                            camera.autoFocus(new Camera.AutoFocusCallback() {
+                                @Override
+                                public void onAutoFocus(boolean success, Camera camera) {
+                                }
+                            });
+                        } catch (Throwable e) {
+                            // startPreview是异步实现，可能在某些机器上前几次调用会autofocus failß
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void opPreviewSize(int width, @SuppressWarnings("unused") int height) {
@@ -417,7 +433,6 @@ public class Camera1Control implements ICameraControl {
                 e.printStackTrace();
 
             }
-            startPreview(false);
         }
     }
 
