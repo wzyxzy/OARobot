@@ -49,9 +49,9 @@ public class OARobotApplication extends Application {
     public static SpeechSynthesizer mTts;
 
     //是否通过身份证验证
-    public static final boolean isNeedId = false;
+    public static final boolean isNeedId = true;
     //是否需要语音录制
-    public static final boolean isNeedVoice = false;
+    public static final boolean isNeedVoice = true;
     // 默认云端发音人
     public static String voicerCloud = pSpeeker_xiaoyan;
     // 默认本地发音人
@@ -152,7 +152,9 @@ public class OARobotApplication extends Application {
         //设置合成音调
         mTts.setParameter(SpeechConstant.PITCH, "45");
         //设置合成音量
-        mTts.setParameter(SpeechConstant.VOLUME, "25");
+        mTts.setParameter(SpeechConstant.VOLUME, isNeedVoice ? "0" : "50");
+        //如果使用合成语音可以调25
+//        mTts.setParameter(SpeechConstant.VOLUME, "25");
         //设置播放器音频流类型
         mTts.setParameter(SpeechConstant.STREAM_TYPE, "3");
 
@@ -164,22 +166,22 @@ public class OARobotApplication extends Application {
         mTts.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
         mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, Environment.getExternalStorageDirectory() + "/msc/tts.wav");
         //谷歌语音使用，已忽略
-//        mSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-//
-//            @Override
-//            public void onInit(int status) {
-//                // TODO Auto-generated method stub
-//                if (status == TextToSpeech.SUCCESS) {
-//                    mSpeech.setLanguage(Locale.CHINA);    //设置语言为英语
-////                    mSpeech.speak("welcome to use '中广同业' OA System", TextToSpeech.QUEUE_FLUSH, null);
-//                    mSpeech.speak("欢迎使用中广通业考勤接待系统", TextToSpeech.QUEUE_FLUSH, null);
-//                    canUserGoogleTTS = true;
-//                } else {
-        canUserGoogleTTS = false;
+        mSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
 
-//                }
-//            }
-//        });
+            @Override
+            public void onInit(int status) {
+                // TODO Auto-generated method stub
+                if (status == TextToSpeech.SUCCESS) {
+                    mSpeech.setLanguage(Locale.CHINA);    //设置语言为英语
+//                    mSpeech.speak("welcome to use '中广同业' OA System", TextToSpeech.QUEUE_FLUSH, null);
+//                    mSpeech.speak("欢迎使用中广通业考勤接待系统", TextToSpeech.QUEUE_FLUSH, null);
+                    canUserGoogleTTS = false;
+                } else {
+                    canUserGoogleTTS = false;
+
+                }
+            }
+        });
 //
     }
 

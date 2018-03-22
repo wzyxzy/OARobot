@@ -13,6 +13,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.baidu.ocr.sdk.OCR;
@@ -47,6 +49,7 @@ import com.baidu.ocr.ui.camera.CameraNativeHelper;
 import com.baidu.ocr.ui.camera.CameraView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
@@ -55,6 +58,7 @@ import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerListener;
 import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.SynthesizerListener;
@@ -78,7 +82,6 @@ import com.zgty.oarobot.dao.VisitorDaoUtils;
 import com.zgty.oarobot.dao.WorkOnOffDaoUtils;
 import com.zgty.oarobot.receiver.DateTimeReceiver;
 import com.zgty.oarobot.service.RefreshService;
-import com.zgty.oarobot.util.CameraSource2;
 import com.zgty.oarobot.util.FileUtil;
 import com.zgty.oarobot.util.FileUtils;
 import com.zgty.oarobot.util.IdentifyFace2;
@@ -98,6 +101,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.google.android.gms.vision.face.FaceDetector.FAST_MODE;
+import static com.google.android.gms.vision.face.FaceDetector.NO_LANDMARKS;
 import static com.zgty.oarobot.common.Constant.MAIN_CHECK_CAMERA_TYPE;
 import static com.zgty.oarobot.common.OARobotApplication.canUserGoogleTTS;
 import static com.zgty.oarobot.common.OARobotApplication.isNeedId;
@@ -154,7 +159,10 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
     private boolean isFirstConnect;
     private String visitorId;
 
-    private CameraSource2 mCameraSource = null;
+    private CameraSource mCameraSource = null;
+    private GraphicFaceTrackerFactory graphicFaceTrackerFactory;
+    private GraphicFaceTracker graphicFaceTracker;
+
 
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
@@ -163,6 +171,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 
     private static final int RC_HANDLE_GMS = 9001;
     private static final int REQUEST_CODE_CAMERA = 102;
+    private long num;
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     //全部机器人说的话都写到异步中
@@ -176,7 +185,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                     initData();
                     break;
                 case 1:
-                    robotSpeek(speekDaoUtils.querySpeekingText("cannotRecognise"), 1, 8);
+                    robotSpeek(speekDaoUtils.querySpeekingText("cannotRecognise"), 1, 8, 0);
 //                    soundPool.play(8,1, 1, 0, 0, 1);
                     hearingType = 0;
                     isFirstConnect = true;
@@ -184,7 +193,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                 case 2:
                     mIat = SpeechRecognizer.createRecognizer(getApplicationContext(), mInitListener);
                     initLoadSound();
-                    robotSpeek("欢迎使用中广通业考勤接待系统",0,1);
+                    robotSpeek("欢迎使用中广通业考勤接待系统", 0, 1, 0);
                     break;
                 case 3:
                     List<Visitor> visitors = new VisitorDaoUtils(getApplicationContext()).queryVisitorList(userid);
@@ -195,7 +204,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                         isFirstConnect = false;
                         Staff staff = new StaffDaoUtils(getApplicationContext()).queryStaffList(id).get(0);
                         username = staff.getName_user();
-                        robotSpeek(String.format("您是否联系%s?", staff.getName_user()), 1, 18);
+                        robotSpeek(String.format("您是否联系%s?", staff.getName_user()), 1, 18, Integer.valueOf(staff.getId_clerk()));
                         hearingType = 1;
                     }
                     break;
@@ -205,16 +214,44 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                     break;
                 case 5:
                     robot_webview.bringToFront();
+                    robot_webview.loadUrl("javascript:(function() { var videos = document.getElementsByTagName('video'); for(var i=0;i<videos.length;i++){videos[i].play();}})()");
 
                     break;
                 case 6:
-                    if (mCameraSource != null) {
-                        mCameraSource.release();
-                    }
-                    startCameraSource();
+                    WebSettings settings = robot_webview.getSettings();
+                    settings.setJavaScriptEnabled(true);//设置js支持
+                    settings.setAllowFileAccess(true);
+                    settings.setPluginState(WebSettings.PluginState.ON);
+                    robot_webview.setWebViewClient(new WebViewClient() {
+                        @Override
+                        public void onPageFinished(WebView view, String url) {
+//                super.onPageFinished(view, url);
+                            robot_webview.loadUrl("javascript:(function() { var videos = document.getElementsByTagName('video'); for(var i=0;i<videos.length;i++){videos[i].play();}})()");
+                        }
+                    });
+//        settings.setPluginState(true);
+//        settings.setSupportZoom(true);//设置缩放支持
+//        settings.setDatabaseEnabled(true);//设置界面存储到数据库
+//        settings.setDomStorageEnabled(true);//设置界面支持缓存
+                    robot_webview.setWebChromeClient(new WebChromeClient());
+
+//        robot_webview.loadUrl("http://www.baidu.com");//设置网址
+                    robot_webview.loadUrl("http://192.168.18.77:8080/advertising-0.0.1-SNAPSHOT/gg/index");//设置网址
+//                    robot_webview.loadUrl("http://192.168.18.77:8080/advertising-0.0.1-SNAPSHOT/gg/index");//设置网址
 //                    MemoryManager memoryManager=new MemoryManager();
 //                    allram.setText(memoryManager.getTotalMemory(getApplicationContext()));
 //                    canuse.setText(memoryManager.getAvailMemory(getApplicationContext()));
+                    break;
+                case 7:
+//                    robot_webview.bringToFront();
+                    robot_webview.loadUrl("javascript:(function() { var videos = document.getElementsByTagName('video'); for(var i=0;i<videos.length;i++){videos[i].play();}})()");
+
+                    break;
+                case 8:
+                    //跳转到声纹识别
+//                    LogToastUtils.toastShort(getApplicationContext(), "声纹识别");
+                    num = (long) (Math.random() * 10000);
+
                     break;
             }
 
@@ -255,6 +292,40 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
         soundPool.load(this, R.raw.oarobot31, 1);
         soundPool.load(this, R.raw.oarobot32, 1);
         soundPool.load(this, R.raw.oarobot33, 1);
+        soundPool.load(this, R.raw.oarobot34, 1);
+        soundPool.load(this, R.raw.oarobot35, 1);
+        soundPool.load(this, R.raw.oarobot36, 1);
+        soundPool.load(this, R.raw.oarobot37, 1);
+        soundPool.load(this, R.raw.oarobot38, 1);
+        soundPool.load(this, R.raw.oarobot39, 1);
+        soundPool.load(this, R.raw.oarobot40, 1);
+        soundPool.load(this, R.raw.oarobot41, 1);
+        soundPool.load(this, R.raw.oarobot42, 1);
+        soundPool.load(this, R.raw.oarobot43, 1);
+        soundPool.load(this, R.raw.oarobot44, 1);
+        soundPool.load(this, R.raw.oarobot45, 1);
+        soundPool.load(this, R.raw.oarobot46, 1);
+        soundPool.load(this, R.raw.oarobot47, 1);
+        soundPool.load(this, R.raw.oarobot48, 1);
+        soundPool.load(this, R.raw.oarobot49, 1);
+        soundPool.load(this, R.raw.oarobot50, 1);
+        soundPool.load(this, R.raw.oarobot51, 1);
+        soundPool.load(this, R.raw.oarobot52, 1);
+        soundPool.load(this, R.raw.oarobot53, 1);
+        soundPool.load(this, R.raw.oarobot54, 1);
+        soundPool.load(this, R.raw.oarobot55, 1);
+        soundPool.load(this, R.raw.oarobot56, 1);
+        soundPool.load(this, R.raw.oarobot57, 1);
+        soundPool.load(this, R.raw.oarobot58, 1);
+        soundPool.load(this, R.raw.oarobot59, 1);
+        soundPool.load(this, R.raw.oarobot60, 1);
+        soundPool.load(this, R.raw.oarobot61, 1);
+        soundPool.load(this, R.raw.oarobot62, 1);
+        soundPool.load(this, R.raw.oarobot63, 1);
+        soundPool.load(this, R.raw.oarobot64, 1);
+        soundPool.load(this, R.raw.oarobot65, 1);
+        soundPool.load(this, R.raw.oarobot66, 1);
+
     }
 
 
@@ -344,7 +415,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
         public void onBeginOfSpeech() {
             // 此回调表示：sdk内部录音机已经准备好了，用户可以开始语音输入
             showTip("开始说话");
-            robot_state_text.setText("正在聆听,请说话>>>");
+            robot_state_text.setText("正在聆听,请靠近屏幕说话>>>");
 //            robot_state_text.setTextColor(getResources().getColor(R.color.greenText));
             robot_speak_text.setText(null);
 
@@ -420,21 +491,26 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                 List<Staff> staffList = new StaffDaoUtils(this).queryStaffList();
                 boolean hasPerson = false;
                 if (text.contains("打卡")) {
-                    robotSpeek("现在已经可以打卡了!", 0, 17);
+                    graphicFaceTracker.reset();
+                    robotSpeek("现在已经可以打卡了!", 0, 17, 0);
+
                     return;
                 }
                 if (hearingType == 1) {
+
                     hasPerson = true;
                     if ((!text.contains("不")) && text.contains("是")) {
                         if (canConnect) {
-                            robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), username), 2, 10);
+                            robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), username), 2, 10, 0);
 //                            userid1 = userid;
                         } else {
-                            robotSpeek("前面已有联系任务，您还需等待" + time_second + "秒", 0, 15);
+                            robotSpeek("前面已有联系任务，您还需等待", 0, 15, 0);
+//                            robotSpeek("前面已有联系任务，您还需等待" + time_second + "秒", 0, 15);
                         }
                     } else {
-                        robotSpeek("请说出您要找的人的名字", 1, 16);
+                        robotSpeek("请说出您要找的人的名字", 1, 16, 0);
                         hearingType = 0;
+
                     }
 
                 } else {
@@ -464,7 +540,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                                     visitorDaoUtils.updateVisitor(visitor);
                                 }
                                 if (isNeedId && isFirstConnect) {
-                                    robotSpeek("请您出示身份证！", 0, 0);
+                                    robotSpeek("请您出示身份证！", 0, 34, 0);
                                     try {
                                         Thread.sleep(5000);
                                     } catch (InterruptedException e) {
@@ -472,12 +548,14 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                                     }
                                     takeIdCard();
                                 } else {
-                                    robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2, 10);
+                                    robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), ""), 2, 10, 0);
+//                                    robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), staffList.get(i1).getName_user()), 2, 10, 0);
                                 }
 
 
                             } else {
-                                robotSpeek("前面已有联系任务，您还需等待" + time_second + "秒", 0, 15);
+                                robotSpeek("前面已有联系任务，您还需等待", 0, 15, 0);
+//                                robotSpeek("前面已有联系任务，您还需等待" + time_second + "秒", 0, 15);
                             }
                             hasPerson = true;
                             break;
@@ -486,13 +564,13 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                 }
 
                 if (!hasPerson) {
-                    robotSpeek(speekDaoUtils.querySpeekingText("connectByYourself"), 0, 11);
+                    robotSpeek(speekDaoUtils.querySpeekingText("connectByYourself"), 0, 11, 0);
                 }
                 break;
             case 1:
                 noanswer++;
                 if (noanswer < 3) {
-                    robotSpeek(speekDaoUtils.querySpeekingText("cannotHearingClear"), 1, 9);
+                    robotSpeek(speekDaoUtils.querySpeekingText("cannotHearingClear"), 1, 9, 0);
                 } else {
 //                    identifyFace.startCameraView();
                 }
@@ -501,25 +579,9 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
         }
     }
 
-    private void robotSpeek(String s, final int type, int voice) {
-
-        if (isNeedVoice && voice != 0) {
-            if (voice == 18) {
-                s = username;
-                try {
-                    Thread.sleep(2300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                s = ".";
-            }
-
-            soundPool.play(voice, 1, 1, 0, 0, 1);
-            final String finalS = s;
+    private void robotSpeek(String s, final int type, final int voice, final int user_voice_id) {
 
 
-        }
         robot_speak_text.setTextColor(getResources().getColor(R.color.colorAccent));
         robot_speak_text.setText(s);
         switch (type) {
@@ -586,7 +648,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 
                                 @Override
                                 public void onError() {
-                                    robotSpeek("不好意思，没有为您通知成功!", 0, 14);
+                                    robotSpeek("不好意思，没有为您通知成功!", 0, 14, 0);
                                 }
                             });
 
@@ -646,7 +708,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 
                                 @Override
                                 public void onError() {
-                                    robotSpeek("不好意思，没有为您通知成功!", 0, 19);
+                                    robotSpeek("不好意思，没有为您通知成功!", 0, 19, 0);
                                 }
                             });
 
@@ -663,12 +725,48 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                 break;
 
         }
+        if (isNeedVoice) {
+            switch (voice) {
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    if (user_voice_id > 0 && user_voice_id < 33) {
+                        soundPool.play(user_voice_id + 34, 1, 1, 0, 0, 1);
+
+                    }
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            soundPool.play(voice, 1, 1, 0, 0, 1);
+                        }
+                    }, 1000);
+                    break;
+                case 18:
+                    soundPool.play(voice, 1, 1, 0, 0, 1);
+                    if (user_voice_id > 0 && user_voice_id < 33) {
+                        new Handler().postDelayed(new Runnable() {
+                            public void run() {
+                                soundPool.play(user_voice_id + 34, 1, 1, 0, 0, 1);
+                            }
+                        }, 1200);
+                    }
+                    break;
+                default:
+                    soundPool.play(voice, 1, 1, 0, 0, 1);
+                    break;
+
+            }
+
+        }
+        handler.sendEmptyMessage(7);
 
 
     }
 
     private void successConnect() {
-        robotSpeek("已经为您通知，请等候!", 0, 13);
+        robotSpeek("已经为您通知，请等候!", 0, 13, 0);
         intentRefreshService = new Intent();
         intentRefreshService.setClass(getApplicationContext(), RefreshService.class);
         intentRefreshService.putExtra("userid", userid1);
@@ -761,13 +859,14 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
-                .setProminentFaceOnly(false)
-
+                .setProminentFaceOnly(true)
+                .setMode(FAST_MODE)
+                .setLandmarkType(NO_LANDMARKS)
                 .build();
 
-
+        graphicFaceTrackerFactory = new GraphicFaceTrackerFactory();
         detector.setProcessor(
-                new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
+                new MultiProcessor.Builder<>(graphicFaceTrackerFactory)
                         .build());
 
         if (!detector.isOperational()) {
@@ -782,10 +881,10 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             Log.w(TAG, "Face detector dependencies are not yet available.");
         }
 
-        mCameraSource = new CameraSource2.Builder(context, detector)
-                .setRequestedPreviewSize(480, 640)
-                .setFacing(CameraSource2.CAMERA_FACING_BACK)
-                .setRequestedFps(30.0f)
+        mCameraSource = new CameraSource.Builder(context, detector)
+                .setRequestedPreviewSize(640, 480)
+                .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setRequestedFps(15.0f)
                 .build();
 
     }
@@ -841,7 +940,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 
                 @Override
                 public void onError() {
-
+                    graphicFaceTracker.reset();
                 }
 
                 @Override
@@ -896,7 +995,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 
 
     private void startCameraSource() {
-        WindowManager var4 = (WindowManager)this.getSystemService(WINDOW_SERVICE);
+        WindowManager var4 = (WindowManager) this.getSystemService(WINDOW_SERVICE);
 
         int var6 = var4.getDefaultDisplay().getRotation();
         // check that the device has play services available.
@@ -1027,27 +1126,9 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
         robot_webview = findViewById(R.id.robot_webview);
         layout_robot.bringToFront();
 //        robot_webview.setInitialScale(100);//设置缩放
-        WebSettings settings = robot_webview.getSettings();
-        settings.setJavaScriptEnabled(true);//设置js支持
-        settings.setAllowFileAccess(true);
-        settings.setPluginState(WebSettings.PluginState.ON);
-        robot_webview.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-//                super.onPageFinished(view, url);
-                robot_webview.loadUrl("javascript:(function() { var videos = document.getElementsByTagName('video'); for(var i=0;i<videos.length;i++){videos[i].play();}})()");
-            }
-        });
-//        settings.setPluginState(true);
-//        settings.setSupportZoom(true);//设置缩放支持
-//        settings.setDatabaseEnabled(true);//设置界面存储到数据库
-//        settings.setDomStorageEnabled(true);//设置界面支持缓存
-        robot_webview.setWebChromeClient(new WebChromeClient());
-
-//        robot_webview.loadUrl("http://www.baidu.com");//设置网址
-        robot_webview.loadUrl("http://192.168.18.77:8080/advertising-0.0.1-SNAPSHOT/gg/index");//设置网址
 
 
+        handler.sendEmptyMessage(6);
         handler.sendEmptyMessage(5);
 
 //        Timer timer=new Timer();
@@ -1070,9 +1151,10 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             username = staff.getName_user();
             if (staff.getUser_type().equals("1")) {
                 if (canConnect) {
-                    robotSpeek(String.format(speekDaoUtils.querySpeekingText("getOffStaff"), username), 3, 12);
+                    robotSpeek(String.format(speekDaoUtils.querySpeekingText("getOffStaff"), username), 3, 12, 0);
                 } else {
-                    robotSpeek(username + "，您已离职，但前面已有联系任务，您还需等待" + time_second + "秒", 0, 20);
+                    robotSpeek(username + "，您已离职，但前面已有联系任务，您还需等待", 0, 20, 0);
+//                    robotSpeek(username + "，您已离职，但前面已有联系任务，您还需等待" + time_second + "秒", 0, 20);
                 }
 
                 return;
@@ -1113,30 +1195,31 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
     //获取打卡类型
     private String getType(Staff staff) {
         String type = "";
+        int user_voice_id = Integer.valueOf(staff.getId_clerk());
 
         if (timenow >= timeadd) {
             type = "加班";
-            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeAddNormal"), staff.getName_user()), 0, 7);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeAddNormal"), staff.getName_user()), 0, 7, user_voice_id);
 //            soundPool.play(7,1, 1, 0, 0, 1);
         } else if (timenow >= timeoff) {
             type = "正常下班";
-            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOffNormal"), staff.getName_user()), 0, 6);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOffNormal"), staff.getName_user()), 0, 6, user_voice_id);
 //            soundPool.play(6,1, 1, 0, 0, 1);
         } else if (timenow > timeoffearly) {
             type = "早退";
-            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOffEarly"), staff.getName_user()), 0, 5);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOffEarly"), staff.getName_user()), 0, 5, user_voice_id);
 //            soundPool.play(5,1, 1, 0, 0, 1);
         } else if (timenow > timeonlate) {
             type = "中途外出";
-            robotSpeek(String.format(speekDaoUtils.querySpeekingText("goOutNormal"), staff.getName_user()), 0, 4);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("goOutNormal"), staff.getName_user()), 0, 4, user_voice_id);
 //            soundPool.play(4,1, 1, 0, 0, 1);
         } else if (timenow > timeon) {
             type = "迟到";
-            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOnLate"), staff.getName_user()), 0, 3);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOnLate"), staff.getName_user()), 0, 3, user_voice_id);
 //            soundPool.play(3,1, 1, 0, 0, 1);
         } else {
             type = "正常上班";
-            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOnNormal"), staff.getName_user()), 0, 2);
+            robotSpeek(String.format(speekDaoUtils.querySpeekingText("timeOnNormal"), staff.getName_user()), 0, 2, user_voice_id);
 //            soundPool.play(2,1, 1, 0, 0, 1);
         }
 
@@ -1205,9 +1288,9 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             mIat.stopListening();
 
         }
-        if (mCameraSource != null) {
-            mCameraSource.release();
-        }
+//        if (mCameraSource != null) {
+//            mCameraSource.release();
+//        }
     }
 
     /**
@@ -1260,70 +1343,71 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             String result = intent.getStringExtra("result");
             switch (result) {
                 case "worktable":
-                    robotSpeek("对方已经接受了您的请求，请您直接去他的工位或办公室!", 0, 21);
+                    robotSpeek("对方已经接受了您的请求，请您直接去他的工位或办公室!", 0, 21, 0);
                     wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "combig":
-                    robotSpeek("对方已经接受了您的请求，请您到大会议室等候!", 0, 22);
+                    robotSpeek("对方已经接受了您的请求，请您到大会议室等候!", 0, 22, 0);
                     wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "comsmall":
-                    robotSpeek("对方已经接受了您的请求，请您到小会议室等候!", 0, 23);
+                    robotSpeek("对方已经接受了您的请求，请您到小会议室等候!", 0, 23, 0);
                     wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "talk1":
-                    robotSpeek("对方已经接受了您的请求，请您到洽谈室1等候!", 0, 24);
+                    robotSpeek("对方已经接受了您的请求，请您到洽谈室1等候!", 0, 24, 0);
                     wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "talk2":
-                    robotSpeek("对方已经接受了您的请求，请您到洽谈室2等候!", 0, 25);
+                    robotSpeek("对方已经接受了您的请求，请您到洽谈室2等候!", 0, 25, 0);
                     wxcpUtils.sendText(null, userid1, "已经让对方通过！", "text");
                     break;
                 case "wangxiaodi04":
-                    robotSpeek("对方不方便与您联系，已将您转接至我公司行政!", 2, 26);
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司行政!", 2, 26, 0);
                     wxcpUtils.sendText(null, userid1, "已经为对方转接至行政王晓迪！", "text");
                     userid1 = "wangxiaodi04";
                     break;
                 case "yuantong05":
-                    robotSpeek("对方不方便与您联系，已将您转接至我公司行政!", 2, 26);
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司行政!", 2, 26, 0);
                     wxcpUtils.sendText(null, userid1, "已经为对方转接至行政袁彤！", "text");
                     userid1 = "yuantong05";
                     break;
                 case "chenjingyi29":
-                    robotSpeek("对方不方便与您联系，已将您转接至我公司人事!", 2, 27);
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司人事!", 2, 27, 0);
                     wxcpUtils.sendText(null, userid1, "已经为对方转接至人事陈静怡！", "text");
                     userid1 = "chenjingyi29";
                     break;
                 case "weixin12":
-                    robotSpeek("对方不方便与您联系，已将您转接至我公司开发!", 2, 28);
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司开发!", 2, 28, 0);
                     wxcpUtils.sendText(null, userid1, "已经为对方转接至开发魏鑫", "text");
                     userid1 = "weixin12";
                     break;
                 case "wuzhiying16":
-                    robotSpeek("对方不方便与您联系，已将您转接至我公司开发!", 2, 28);
+                    robotSpeek("对方不方便与您联系，已将您转接至我公司开发!", 2, 28, 0);
                     wxcpUtils.sendText(null, userid1, "已经为对方转接至开发巫志英！", "text");
                     userid1 = "wuzhiying16";
                     break;
                 case "reject":
                 case "other":
-                    robotSpeek("对方已经拒绝了您的请求，请您自行联系!", 0, 29);
+                    robotSpeek("对方已经拒绝了您的请求，请您自行联系!", 0, 29, 0);
                     wxcpUtils.sendText(null, userid1, "已经拒绝对方！", "text");
                     break;
                 case "waiting":
-                    robotSpeek("对方暂时不方便与您联系，请您稍等几分钟后再试!", 0, 30);
+                    robotSpeek("对方暂时不方便与您联系，请您稍等几分钟后再试!", 0, 30, 0);
                     wxcpUtils.sendText(null, userid1, "已经拒绝对方，并提示对方等待！", "text");
                     break;
                 case "changing":
-                    robotSpeek("对方暂时无法与您联系，请您修改预约时间!", 0, 31);
+                    robotSpeek("对方暂时无法与您联系，请您修改预约时间!", 0, 31, 0);
                     wxcpUtils.sendText(null, userid1, "已经拒绝对方,并提示改预约时间！", "text");
                     break;
                 case "telephone":
-                    robotSpeek("对方希望您通过电话联系!电话号码是：" + new StaffDaoUtils(getApplicationContext()).queryStaffList(userid1).get(0).getCall_num(), 0, 32);
+                    robotSpeek("对方希望您通过电话联系!", 0, 32, 0);
+//                    robotSpeek("对方希望您通过电话联系!电话号码是：" + new StaffDaoUtils(getApplicationContext()).queryStaffList(userid1).get(0).getCall_num(), 0, 32);
                     robot_state_text.setText("电话号码是：" + new StaffDaoUtils(getApplicationContext()).queryStaffList(userid1).get(0).getCall_num());
                     wxcpUtils.sendText(null, userid1, "已经拒绝对方，并提示电话联系！", "text");
                     break;
                 case "timeout":
-                    robotSpeek("超过一分钟没有答复，请您自行联系!", 0, 33);
+                    robotSpeek("超过一分钟没有答复，请您自行联系!", 0, 33, 0);
                     wxcpUtils.sendText(null, userid1, "您超过一分钟没有回复，该信息已经失效！", "text");
                     break;
             }
@@ -1331,6 +1415,8 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 
         }
     }
+
+    ;
     //==============================================================================================
     // Graphic Face Tracker
     //==============================================================================================
@@ -1342,7 +1428,8 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
     private class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
         @Override
         public Tracker<Face> create(Face face) {
-            return new GraphicFaceTracker(mGraphicOverlay);
+            graphicFaceTracker = new GraphicFaceTracker(mGraphicOverlay);
+            return graphicFaceTracker;
         }
     }
 
@@ -1356,6 +1443,9 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
         private boolean isFirst;
         private float lastSmile;
         private float firstSmile;
+        private int needGoSecond = 5000;
+        private Timer timer;
+        private TimerTask timerTask;
 
 
         private int dip2px(Context context, float dipValue) {
@@ -1371,6 +1461,11 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 
         }
 
+        public void reset() {
+            isFirst = true;
+            mFaceGraphic.setIsFirst(isFirst);
+        }
+
 
         /**
          * Start tracking the detected face instance within the face overlay.
@@ -1380,7 +1475,18 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             mFaceGraphic.setId(faceId);
             isFirst = true;
             mFaceGraphic.setIsFirst(isFirst);
-
+//            timer.cancel();
+//            timerTask.cancel();
+            timer = new Timer();
+            timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    if (isFirst) {
+                        handler.sendEmptyMessage(8);
+                    }
+                }
+            };
+            timer.schedule(timerTask, needGoSecond);
             handler.sendEmptyMessage(4);
 //            layout_robot.setVisibility(View.VISIBLE);
 //            if (item.getIsSmilingProbability() > 0) {
@@ -1389,7 +1495,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 //                firstSmile = 0;
 //            }
             firstSmile = item.getIsSmilingProbability();
-//            robot_state_text.setText("请您微笑");
+//            robot_state_text.setText("请面对摄像头保持微笑");
 //            mSpeech.speak("请您微笑", TextToSpeech.QUEUE_FLUSH, null);
 //            mSpeech.speak("please smile", TextToSpeech.QUEUE_FLUSH, null);
 
@@ -1431,14 +1537,14 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                 firstSmile = lastSmile;
             }
             rb_normal.setRating(lastSmile * 5);
-            if (isFirst && lastSmile - firstSmile >= 0.6) {
+            if (isFirst && lastSmile - firstSmile >= 0.3) {
                 Log.e("smile", "lastSmile is " + lastSmile + ", firstSmile is " + firstSmile);
-                mCameraSource.takePicture(new CameraSource2.ShutterCallback() {
+                mCameraSource.takePicture(new CameraSource.ShutterCallback() {
                     @Override
                     public void onShutter() {
 
                     }
-                }, new CameraSource2.PictureCallback() {
+                }, new CameraSource.PictureCallback() {
                     @Override
                     public void onPictureTaken(byte[] bytes) {
                         if (bytes != null) {
@@ -1468,6 +1574,8 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
 //            robot_state_text.setText("准备就绪");
             handler.sendEmptyMessage(5);
             rb_normal.setRating(0);
+            timer.cancel();
+//            timerTask.cancel();
         }
 
         /**
@@ -1479,6 +1587,8 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
             mOverlay.remove(mFaceGraphic);
             rb_normal.setRating(0);
             handler.sendEmptyMessage(5);
+            timer.cancel();
+//            timerTask.cancel();
         }
     }
 
@@ -1563,7 +1673,7 @@ public class MainActivityN extends CommonActivity implements View.OnClickListene
                     idCard.setId_card_num(result.getIdNumber().getWords());
                     idCard.setSex(result.getGender().getWords());
                     new IdCardDaoUtils(getApplicationContext()).insertIdCard(idCard);
-                    robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), username), 2, 10);
+                    robotSpeek(String.format(speekDaoUtils.querySpeekingText("connectForYou"), username), 2, 10, 0);
                 }
             }
 

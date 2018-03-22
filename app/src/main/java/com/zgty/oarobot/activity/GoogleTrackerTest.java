@@ -10,6 +10,7 @@ import android.widget.RatingBar;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
@@ -18,7 +19,6 @@ import com.zgty.oarobot.R;
 import com.zgty.oarobot.camera.CameraSourcePreview;
 import com.zgty.oarobot.camera.GraphicOverlay;
 import com.zgty.oarobot.common.CommonActivity;
-import com.zgty.oarobot.util.CameraSource2;
 import com.zgty.oarobot.util.FileUtils;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ import static com.zgty.oarobot.common.OARobotApplication.mTts;
 public class GoogleTrackerTest extends CommonActivity {
 
     private static final String TAG = GoogleTrackerTest.class.getSimpleName();
-    private CameraSource2 mCameraSource = null;
+    private CameraSource mCameraSource = null;
 
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
@@ -150,9 +150,9 @@ public class GoogleTrackerTest extends CommonActivity {
             Log.w(TAG, "Face detector dependencies are not yet available.");
         }
 
-        mCameraSource = new CameraSource2.Builder(context, detector)
+        mCameraSource = new CameraSource.Builder(context, detector)
                 .setRequestedPreviewSize(640, 480)
-                .setFacing(CameraSource2.CAMERA_FACING_BACK)
+                .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedFps(30.0f)
                 .build();
     }
@@ -234,12 +234,12 @@ public class GoogleTrackerTest extends CommonActivity {
 
             rb_normal.setRating(lastSmile * 5);
             if (isFirst && firstSmile <= 0.2 && lastSmile >= 0.6) {
-                mCameraSource.takePicture(new CameraSource2.ShutterCallback() {
+                mCameraSource.takePicture(new CameraSource.ShutterCallback() {
                     @Override
                     public void onShutter() {
 
                     }
-                }, new CameraSource2.PictureCallback() {
+                }, new CameraSource.PictureCallback() {
                     @Override
                     public void onPictureTaken(byte[] bytes) {
                         if (bytes != null) {

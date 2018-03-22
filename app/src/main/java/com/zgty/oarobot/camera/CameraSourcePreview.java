@@ -24,7 +24,7 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 
 import com.google.android.gms.common.images.Size;
-import com.zgty.oarobot.util.CameraSource2;
+import com.google.android.gms.vision.CameraSource;
 
 
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class CameraSourcePreview extends ViewGroup {
     private SurfaceView mSurfaceView;
     private boolean mStartRequested;
     private boolean mSurfaceAvailable;
-    private CameraSource2 mCameraSource;
+    private CameraSource mCameraSource;
 
     private GraphicOverlay mOverlay;
 
@@ -51,7 +51,7 @@ public class CameraSourcePreview extends ViewGroup {
         addView(mSurfaceView);
     }
 
-    public void start(CameraSource2 cameraSource) throws IOException {
+    public void start(CameraSource cameraSource) throws IOException {
         if (cameraSource == null) {
             stop();
         }
@@ -64,7 +64,7 @@ public class CameraSourcePreview extends ViewGroup {
         }
     }
 
-    public void start(CameraSource2 cameraSource, GraphicOverlay overlay) throws IOException {
+    public void start(CameraSource cameraSource, GraphicOverlay overlay) throws IOException {
         mOverlay = overlay;
         start(cameraSource);
     }
